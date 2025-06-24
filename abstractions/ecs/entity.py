@@ -56,31 +56,35 @@ class EntityTree(BaseModel):
     def find_entities_with_component(self, component_name: str) -> List[UUID]:
         """
         Find all entities that have a specific component.
-        
+
         Args:
             component_name: Name of the component to search for
-            
+
         Returns:
             List of entity IDs that have the specified component
         """
         return [
-            entity_id for entity_id, entity in self.nodes.items()
+            entity_id
+            for entity_id, entity in self.nodes.items()
             if component_name in entity.data
         ]
 
-    def find_entities_by_relationship(self, source_id: UUID, edge_type: EdgeType) -> List[UUID]:
+    def find_entities_by_relationship(
+        self, source_id: UUID, edge_type: EdgeType
+    ) -> List[UUID]:
         """
         Find entities connected by specific relationship types.
-        
+
         Args:
             source_id: ID of the source entity
             edge_type: Type of relationship to search for
-            
+
         Returns:
             List of target entity IDs connected to source by the specified edge type
         """
         return [
-            target_id for (src_id, target_id), edge in self.edges.items()
+            target_id
+            for (src_id, target_id), edge in self.edges.items()
             if src_id == source_id and edge.edge_type == edge_type
         ]
 
@@ -114,8 +118,7 @@ def get_default_tree() -> EntityTree:
         # Create a default entity as root
         root_entity = Entity()
         _default_tree = EntityTree(
-            root_ecs_id=root_entity.ecs_id,
-            lineage_id=root_entity.lineage_id
+            root_ecs_id=root_entity.ecs_id, lineage_id=root_entity.lineage_id
         )
         _default_tree.nodes[root_entity.ecs_id] = root_entity
     return _default_tree
@@ -127,14 +130,16 @@ def set_default_tree(tree: EntityTree) -> None:
     _default_tree = tree
 
 
-def find_entities_with_component(component_name: str, tree: Optional[EntityTree] = None) -> List[UUID]:
+def find_entities_with_component(
+    component_name: str, tree: Optional[EntityTree] = None
+) -> List[UUID]:
     """
     Find all entities that have a specific component in the tree.
-    
+
     Args:
         component_name: Name of the component to search for
         tree: EntityTree to search in (uses default if None)
-        
+
     Returns:
         List of entity IDs that have the specified component
     """
@@ -143,15 +148,17 @@ def find_entities_with_component(component_name: str, tree: Optional[EntityTree]
     return tree.find_entities_with_component(component_name)
 
 
-def find_entities_by_relationship(source_id: UUID, edge_type: EdgeType, tree: Optional[EntityTree] = None) -> List[UUID]:
+def find_entities_by_relationship(
+    source_id: UUID, edge_type: EdgeType, tree: Optional[EntityTree] = None
+) -> List[UUID]:
     """
     Find entities connected by specific relationship types.
-    
+
     Args:
         source_id: ID of the source entity
         edge_type: Type of relationship to search for
         tree: EntityTree to search in (uses default if None)
-        
+
     Returns:
         List of target entity IDs connected to source by the specified edge type
     """

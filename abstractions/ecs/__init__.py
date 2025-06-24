@@ -9,8 +9,8 @@ from .entity import (
     EntityEdge,
     EntityTree,
     SimpleEntity,
-    find_entities_with_component,
     find_entities_by_relationship,
+    find_entities_with_component,
     get_default_tree,
     set_default_tree,
 )
