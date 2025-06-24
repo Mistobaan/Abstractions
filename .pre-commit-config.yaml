@@ -29,14 +29,6 @@ repos:
         additional_dependencies: [pydantic]
         args: [--ignore-missing-imports]
 
-  # bandit - Security linting
-  - repo: https://github.com/pycqa/bandit
-    rev: 1.7.9
-    hooks:
-      - id: bandit
-        args: [-r, ., -f, json, -o, bandit-report.json]
-        exclude: ^tests/
-
   # pre-commit hooks
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.6.0

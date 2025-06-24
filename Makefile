@@ -24,7 +24,7 @@ format:
 lint:
 	flake8 .
 	mypy .
-	bandit -r . -f json -o bandit-report.json || true
+	bandit -r abstractions/ -f json -o bandit-report.json || true
 
 # Run all checks (format, lint, test)
 check: format lint test

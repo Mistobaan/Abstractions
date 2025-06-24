@@ -31,6 +31,8 @@ class BaseRegistry(Generic[T]):
     _instance = None
     _registry: Dict[Union[str, UUID], T] = {}
     _timestamps: Dict[Union[str, UUID], datetime] = {}
+    _log_stream: StringIO
+    _logger: logging.Logger
 
     def __new__(cls) -> "BaseRegistry":
         if cls._instance is None:
