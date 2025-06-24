@@ -94,7 +94,7 @@ The `CallableRegistry` provides:
 class CallableRegistry(BaseRegistry[Callable]):
     """Global registry for callable functions with entity tracing"""
     _registry: Dict[str, Callable]
-    
+
     @classmethod
     def register(cls, name: str, func: Callable) -> None:
         """Register a new callable with validation and automatic entity tracing"""

@@ -16,12 +16,12 @@ class InformationEvent(BaseModel):
     timestamp: datetime = Field(default_factory=datetime.now)
     event_type: InformationEventType = Field(description="Type of information event")
     phase: ProcessPhase = Field(default=ProcessPhase.DECLARATION)
-    
+
     # Information coordination metadata
     affected_entities: List[UUID] = Field(default_factory=list)
     entity_types_available: Set[str] = Field(default_factory=set)
     information_gain: float = Field(default=0.0)
-    
+
     # Process execution metadata
     callable_name: Optional[str] = Field(default=None)
     input_entity_references: Dict[str, str] = Field(default_factory=dict)
@@ -64,12 +64,12 @@ def analyze_customer_sentiment(customer_data: CustomerEntity, text_analysis: Tex
 **Automatic Connection Detection**: The system continuously monitors information stack updates to detect when socket binding conditions are satisfied:
 
 ```python
-def evaluate_socket_binding(process_signature: ProcessSignature, 
+def evaluate_socket_binding(process_signature: ProcessSignature,
                           available_entities: List[Entity]) -> bool:
     """Check if process socket can bind to available information"""
     required_types = {param.type for param in process_signature.parameters.values()}
     available_types = {type(entity) for entity in available_entities}
-    
+
     # Socket binding condition: all required types available
     return required_types.issubset(available_types)
 ```
@@ -85,16 +85,16 @@ def evaluate_socket_binding(process_signature: ProcessSignature,
 ```python
 class InformationOrchestrator:
     """WebSocket-style event streaming for process coordination"""
-    
+
     @classmethod
     def register_event(cls, event: InformationEvent) -> InformationEvent:
         """Stream event to all registered handlers"""
         # Store event in multiple indexes for efficient access
         cls._store_event(event)
-        
+
         # Stream to all handlers that match event patterns
         handlers = cls._get_handlers_for_event(event)
-        
+
         # Process through handlers in priority order
         current_event = event
         for handler in handlers:
@@ -102,7 +102,7 @@ class InformationOrchestrator:
             if result and result.modified:
                 current_event = result
                 cls._store_event(current_event)
-        
+
         return current_event
 ```
 
@@ -119,24 +119,24 @@ class InformationTrigger(BaseModel):
     event_phase: ProcessPhase = Field(description="Process phase")
     required_entity_types: Set[str] = Field(default_factory=set)
     novel_output_types: Set[str] = Field(default_factory=set)
-    
+
     def __call__(self, event: InformationEvent, current_stack: List[Entity]) -> bool:
         """Evaluate trigger conditions"""
         # Basic event pattern matching
         if not (event.event_type == self.event_type and event.phase == self.event_phase):
             return False
-        
+
         # Type compatibility check
         available_types = {entity.__class__.__name__ for entity in current_stack}
-        
+
         # Required types must be available
         if self.required_entity_types and not self.required_entity_types.issubset(available_types):
             return False
-        
+
         # Output types must be novel
         if self.novel_output_types and self.novel_output_types.issubset(available_types):
             return False
-        
+
         return True
 ```
 
@@ -146,13 +146,13 @@ class InformationTrigger(BaseModel):
 def generate_process_trigger(callable_name: str) -> InformationTrigger:
     """Generate trigger from callable signature"""
     signature = CallableRegistry.get_signature(callable_name)
-    
+
     # Extract required input types
     required_types = {param.type.__name__ for param in signature.parameters.values()}
-    
+
     # Extract novel output types
     output_types = {signature.return_type.__name__}
-    
+
     return InformationTrigger(
         event_type=InformationEventType.STACK_UPDATE,
         event_phase=ProcessPhase.EFFECT,
@@ -166,21 +166,21 @@ def generate_process_trigger(callable_name: str) -> InformationTrigger:
 **Information Gain as Execution Filter**: The trigger system incorporates **information gain assessment** to prevent redundant computation:
 
 ```python
-def assess_information_gain(process_signature: ProcessSignature, 
+def assess_information_gain(process_signature: ProcessSignature,
                           current_stack: List[Entity]) -> float:
     """Calculate potential information gain from process execution"""
     output_types = {process_signature.return_type}
     existing_types = {type(entity) for entity in current_stack}
-    
+
     # Count novel information types that would be produced
     novel_types = output_types - existing_types
     base_gain = len(novel_types)
-    
+
     # Additional factors could include:
     # - Goal relevance score
     # - Information content richness
     # - Computational efficiency
-    
+
     return base_gain
 ```
 
@@ -193,16 +193,16 @@ def assess_information_gain(process_signature: ProcessSignature,
 ```python
 class ProcessExecutionQueue:
     """Priority queue ordered by information gain potential"""
-    
+
     def __init__(self):
         self._queue: List[ProcessExecution] = []
         self._execution_priorities: Dict[str, float] = {}
-    
+
     def enqueue_process(self, callable_name: str, current_stack: List[Entity]) -> None:
         """Add process to queue with information gain priority"""
         # Calculate information gain potential
         priority = calculate_information_priority(callable_name, current_stack)
-        
+
         # Create process execution record
         execution = ProcessExecution(
             callable_name=callable_name,
@@ -210,10 +210,10 @@ class ProcessExecutionQueue:
             timestamp=datetime.now(),
             input_stack_snapshot=current_stack.copy()
         )
-        
+
         # Insert in priority order
         self._insert_by_priority(execution)
-    
+
     def _insert_by_priority(self, execution: ProcessExecution) -> None:
         """Insert execution maintaining priority order"""
         # Higher information gain = higher priority
@@ -223,7 +223,7 @@ class ProcessExecutionQueue:
                 insert_index = i + 1
             else:
                 break
-        
+
         self._queue.insert(insert_index, execution)
 ```
 
@@ -233,7 +233,7 @@ class ProcessExecutionQueue:
 def coordinate_jit_execution(cls, stack_update_event: InformationEvent) -> None:
     """Coordinate just-in-time process execution"""
     current_stack = cls._current_information_stack
-    
+
     # Discover newly executable processes
     executable_processes = []
     for callable_name in CallableRegistry.get_all_names():
@@ -241,10 +241,10 @@ def coordinate_jit_execution(cls, stack_update_event: InformationEvent) -> None:
             gain = calculate_information_priority(callable_name, current_stack)
             if gain > 0:  # Only execute if novel information would be produced
                 executable_processes.append((callable_name, gain))
-    
+
     # Sort by information gain (highest first)
     executable_processes.sort(key=lambda x: x[1], reverse=True)
-    
+
     # Execute processes in priority order
     for callable_name, priority in executable_processes:
         execution_event = InformationEvent(
@@ -263,10 +263,10 @@ def execute_process_safely(callable_name: str, input_stack: List[Entity]) -> Ent
     """Execute process with automatic dependency safety"""
     # Construct entity references from immutable stack
     inputs = construct_entity_references(callable_name, input_stack)
-    
+
     # Execute process (cannot conflict with other processes)
     result = CallableRegistry.execute_callable(callable_name, inputs)
-    
+
     # Result is new entity, cannot conflict with existing data
     return result
 ```
@@ -281,30 +281,30 @@ def check_termination_condition(current_stack: List[Entity]) -> bool:
             gain = calculate_information_priority(callable_name, current_stack)
             if gain > 0:
                 return False  # More processing possible
-    
+
     return True  # No novel information can be produced
 ```
 
 **Parallel Execution Safety**: The **append-only information model** enables **trivial parallelization** of process execution:
 
 ```python
-def execute_parallel_processes(executable_processes: List[str], 
+def execute_parallel_processes(executable_processes: List[str],
                              input_stack: List[Entity]) -> List[Entity]:
     """Execute multiple processes in parallel safely"""
     import concurrent.futures
-    
+
     # All processes read from same immutable stack
     # All processes produce independent new entities
     # No coordination or locking needed
-    
+
     with concurrent.futures.ThreadPoolExecutor() as executor:
         futures = [
             executor.submit(execute_process_safely, process_name, input_stack)
             for process_name in executable_processes
         ]
-        
+
         results = [future.result() for future in concurrent.futures.as_completed(futures)]
-    
+
     return results
 ```
 
@@ -315,7 +315,7 @@ def execute_parallel_processes(executable_processes: List[str],
 ```python
 class EntityRegistryWithEvents:
     """Enhanced EntityRegistry with automatic event broadcasting"""
-    
+
     @classmethod
     def register_entity(cls, entity: Entity) -> None:
         """Register entity and broadcast availability"""
@@ -324,52 +324,52 @@ class EntityRegistryWithEvents:
             raise ValueError("can only register root entities with a root_ecs_id for now")
         elif not entity.is_root_entity():
             raise ValueError("can only register root entities for now")
-        
+
         entity_tree = build_entity_tree(entity)
         EntityRegistry.register_entity_tree(entity_tree)
-        
+
         # Broadcast entity creation through event system
         InformationOrchestrator.update_information_stack([entity])
-    
+
     @classmethod
     def version_entity(cls, entity: Entity, force_versioning: bool = False) -> bool:
         """Version entity with automatic event broadcasting"""
         # Execute original versioning logic
         if not entity.root_ecs_id:
             raise ValueError("entity has no root_ecs_id for versioning")
-        
+
         old_tree = EntityRegistry.get_stored_tree(entity.root_ecs_id)
         if old_tree is None:
             cls.register_entity(entity)
             return True
-        
+
         new_tree = build_entity_tree(entity)
         if force_versioning:
             modified_entities = list(new_tree.nodes.keys())
         else:
             modified_entities = list(find_modified_entities(new_tree=new_tree, old_tree=old_tree))
-        
+
         typed_entities = [eid for eid in modified_entities if isinstance(eid, UUID)]
-        
+
         if len(typed_entities) > 0:
             # Execute original entity updating logic
             current_root_ecs_id = new_tree.root_ecs_id
             root_entity = new_tree.get_entity(current_root_ecs_id)
             root_entity.update_ecs_ids()
             new_root_ecs_id = root_entity.ecs_id
-            
+
             new_tree.nodes.pop(current_root_ecs_id)
             new_tree.nodes[new_root_ecs_id] = root_entity
             new_tree.root_ecs_id = new_root_ecs_id
             new_tree.lineage_id = root_entity.lineage_id
-            
+
             EntityRegistry.register_entity_tree(new_tree)
-            
+
             # Broadcast entity updates through event system
-            updated_entities = [new_tree.get_entity(eid) for eid in typed_entities 
+            updated_entities = [new_tree.get_entity(eid) for eid in typed_entities
                               if new_tree.get_entity(eid) is not None]
             InformationOrchestrator.update_information_stack(updated_entities)
-        
+
         return True
 ```
 
@@ -378,11 +378,11 @@ class EntityRegistryWithEvents:
 ```python
 class ProcessHandler:
     """Reactive wrapper for CallableRegistry processes"""
-    
+
     def __init__(self, callable_name: str):
         self.callable_name = callable_name
         self.trigger_conditions = [self._generate_trigger()]
-    
+
     def _generate_trigger(self) -> InformationTrigger:
         """Generate trigger from callable signature"""
         # This would use actual CallableRegistry.get_signature in practice
@@ -391,14 +391,14 @@ class ProcessHandler:
             event_phase=ProcessPhase.EFFECT,
             # required_entity_types and novel_output_types derived from signature
         )
-    
+
     def __call__(self, event: InformationEvent, current_stack: List[Entity]) -> Optional[InformationEvent]:
         """Execute process if conditions are met"""
         for trigger in self.trigger_conditions:
             if trigger(event, current_stack):
                 # Construct entity references
                 inputs = construct_entity_references(self.callable_name, current_stack)
-                
+
                 # Execute through CallableRegistry
                 try:
                     # result_entity = CallableRegistry.execute_callable(self.callable_name, inputs)
@@ -422,7 +422,7 @@ class ProcessHandler:
 ```python
 class CompleteInformationFlow:
     """Demonstration of complete information flow coordination"""
-    
+
     @classmethod
     def initialize_system(cls):
         """Initialize complete information processing system"""
@@ -430,11 +430,11 @@ class CompleteInformationFlow:
         for callable_name in CallableRegistry.get_all_names():
             handler = ProcessHandler(callable_name)
             InformationOrchestrator.add_process_handler(handler)
-        
+
         # Set up goal monitoring
         # goal_handler = GoalEvaluationHandler(target_goal)
         # InformationOrchestrator.add_process_handler(goal_handler)
-    
+
     @classmethod
     def process_information_flow(cls, initial_entities: List[Entity], goal: InformationGoal):
         """Execute complete information flow to goal achievement"""
@@ -442,7 +442,7 @@ class CompleteInformationFlow:
         EntityRegistryWithEvents.register_entity(initial_entities[0])
         for entity in initial_entities[1:]:
             EntityRegistryWithEvents.register_entity(entity)
-        
+
         # Information flow proceeds automatically:
         # 1. Entity registration triggers stack update events
         # 2. Stack updates trigger process compatibility checks
@@ -450,7 +450,7 @@ class CompleteInformationFlow:
         # 4. Process results create new entities
         # 5. New entities trigger next wave of processing
         # 6. Continues until goal achieved or no more progress possible
-        
+
         return InformationOrchestrator._current_information_stack
 ```
 
@@ -459,16 +459,16 @@ class CompleteInformationFlow:
 ```python
 class InformationGoal:
     """Goal as information attractor"""
-    
+
     def __init__(self, target_types: Set[Type]):
         self.target_types = target_types
-    
+
     def evaluate_progress(self, current_stack: List[Entity]) -> float:
         """Calculate progress toward goal"""
         available_types = {type(entity) for entity in current_stack}
         achieved_types = self.target_types.intersection(available_types)
         return len(achieved_types) / len(self.target_types)
-    
+
     def is_achieved(self, current_stack: List[Entity]) -> bool:
         """Check goal completion"""
         available_types = {type(entity) for entity in current_stack}
@@ -499,7 +499,7 @@ The **lineage_uuid** creates what we call **causal lineage tracking** - every mo
 The **phase** field implements **structured computational progression**. Unlike traditional systems where processes either succeed or fail atomically, our system recognizes that **information processing has natural phases** that enable **progressive refinement** and **intermediate intervention**:
 
 - **DECLARATION**: "This computation is possible" - announce capability without commitment
-- **EXECUTION**: "This computation is happening" - commit resources and begin processing  
+- **EXECUTION**: "This computation is happening" - commit resources and begin processing
 - **EFFECT**: "This computation produced results" - validate outputs and create new entities
 - **COMPLETION**: "This computation is finished" - update global state and trigger cascades
 
@@ -532,7 +532,7 @@ The final piece of the Goal-Directed Typed Processes architecture is an **emerge
 
 **Architectural Transformation**: The orchestration layer transforms our previous components:
 - **Entity updates** become information availability events
-- **Process selection** becomes reactive trigger evaluation  
+- **Process selection** becomes reactive trigger evaluation
 - **Goal achievement** becomes natural convergence in information space
 - **Resource management** becomes queue optimization with information-theoretic priorities
 
@@ -550,14 +550,14 @@ class InformationEvent(BaseModel):
     timestamp: datetime = Field(default_factory=datetime.now)
     event_type: InformationEventType = Field(description="Type of information update")
     phase: ProcessPhase = Field(default=ProcessPhase.DECLARATION)
-    
+
     # Information flow tracking
     modified: bool = Field(default=False)
     canceled: bool = Field(default=False)
     parent_event: Optional[UUID] = Field(default=None)
     lineage_children_events: List[UUID] = Field(default_factory=list)
     children_events: List[UUID] = Field(default_factory=list)
-    
+
     # Entity coordination
     affected_entities: List[UUID] = Field(default_factory=list)
     information_gain: float = Field(default=0.0)
@@ -565,14 +565,14 @@ class InformationEvent(BaseModel):
 
 **Information Event Types**: Events represent different categories of information flow:
 - **ENTITY_CREATION**: New entity added to registry, expanding available information types
-- **ENTITY_UPDATE**: Existing entity modified, potentially changing information content  
+- **ENTITY_UPDATE**: Existing entity modified, potentially changing information content
 - **PROCESS_EXECUTION**: Callable process triggered, transforming available information
 - **GOAL_EVALUATION**: Goal condition assessment, measuring progress toward objectives
 - **STACK_UPDATE**: Global information stack modified, triggering compatibility re-evaluation
 
 **Event Phases for Process Coordination**: Each information event progresses through structured phases that enable reactive coordination:
 - **DECLARATION**: Information availability announced, compatibility checking initiated
-- **EXECUTION**: Processes triggered, resource allocation and input construction  
+- **EXECUTION**: Processes triggered, resource allocation and input construction
 - **EFFECT**: Results generated, new entities created with provenance tracking
 - **COMPLETION**: Information stack updated, cascade effects triggered
 
@@ -590,48 +590,48 @@ class InformationTrigger(BaseModel):
     event_phase: ProcessPhase = Field(description="Process phase when trigger activates")
     required_entity_types: Set[Type] = Field(description="Entity types needed for process execution")
     novel_output_types: Set[Type] = Field(description="New information types this process produces")
-    
+
     def evaluate_compatibility(self, available_entities: List[Entity]) -> bool:
         """Check if required input types are available"""
         available_types = {type(entity) for entity in available_entities}
         return self.required_entity_types.issubset(available_types)
-    
+
     def evaluate_information_gain(self, current_stack: List[Entity]) -> bool:
         """Check if process would produce novel information"""
         existing_types = {type(entity) for entity in current_stack}
         return not self.novel_output_types.issubset(existing_types)
-    
+
     def should_trigger(self, event: InformationEvent, current_stack: List[Entity]) -> bool:
         """Evaluate both compatibility and information gain"""
         if not (event.event_type == self.event_type and event.phase == self.event_phase):
             return False
-        
-        return (self.evaluate_compatibility(current_stack) and 
+
+        return (self.evaluate_compatibility(current_stack) and
                 self.evaluate_information_gain(current_stack))
 ```
 
 **Automatic Process Discovery**: The system continuously evaluates which processes can execute as information becomes available:
 
 ```python
-def discover_executable_processes(current_stack: List[Entity], 
+def discover_executable_processes(current_stack: List[Entity],
                                 available_processes: List[str]) -> List[str]:
     """Find all processes that can execute with current information"""
     executable = []
-    
+
     for process_name in available_processes:
         # Get process signature from CallableRegistry
         signature = CallableRegistry.get_signature(process_name)
         required_types = {param.type for param in signature.parameters.values()}
         output_types = {signature.return_type}
-        
+
         # Check compatibility and novelty
         available_types = {type(entity) for entity in current_stack}
         existing_types = {type(entity) for entity in current_stack}
-        
-        if (required_types.issubset(available_types) and 
+
+        if (required_types.issubset(available_types) and
             not output_types.issubset(existing_types)):
             executable.append(process_name)
-    
+
     return executable
 ```
 
@@ -643,16 +643,16 @@ def calculate_information_priority(process_name: str, current_stack: List[Entity
     signature = CallableRegistry.get_signature(process_name)
     output_types = {signature.return_type}
     existing_types = {type(entity) for entity in current_stack}
-    
+
     # Novel information types produced
     novel_types = output_types - existing_types
     base_priority = len(novel_types)
-    
+
     # Could incorporate additional factors:
     # - Goal relevance
     # - Computational cost
     # - Historical success rate
-    
+
     return base_priority
 ```
 
@@ -671,12 +671,12 @@ class InformationOrchestrator:
     _events_by_type: Dict[InformationEventType, List[InformationEvent]] = defaultdict(list)
     _events_by_timestamp: Dict[datetime, List[InformationEvent]] = defaultdict(list)
     _all_events: List[InformationEvent] = []
-    
+
     # Process coordination
     _process_handlers: Dict[UUID, ProcessHandler] = {}
     _handlers_by_trigger: Dict[InformationTrigger, List[ProcessHandler]] = defaultdict(list)
     _execution_queue: List[ProcessExecution] = []
-    
+
     # Information stack management
     _current_information_stack: List[Entity] = []
     _information_stack_history: List[List[Entity]] = []
@@ -690,26 +690,26 @@ def register_information_event(cls, event: InformationEvent) -> InformationEvent
     """Register an information event and trigger reactive processes"""
     # Store event in all indices
     cls._store_event(event)
-    
+
     # Find handlers that should react to this event
     triggered_handlers = cls._find_triggered_handlers(event)
-    
+
     # If no handlers or event already complete, return as-is
     if not triggered_handlers or event.phase == ProcessPhase.COMPLETION:
         return event
-    
+
     # Execute triggered handlers
     current_event = event
     for handler in triggered_handlers:
         result = handler(current_event, cls._current_information_stack)
-        
+
         if result and result.canceled:
             cls._store_event(result)
             return result
         elif result and result.modified:
             current_event = result
             cls._store_event(current_event)
-    
+
     return current_event
 ```
 
@@ -721,30 +721,30 @@ def on_information_stack_update(cls, new_entities: List[Entity]):
     # Update current stack
     cls._current_information_stack.extend(new_entities)
     cls._information_stack_history.append(cls._current_information_stack.copy())
-    
+
     # Create stack update event
     stack_event = InformationEvent(
         event_type=InformationEventType.STACK_UPDATE,
         affected_entities=[entity.ecs_id for entity in new_entities],
         information_gain=len(new_entities)
     )
-    
+
     # Broadcast through event system
     processed_event = cls.register_information_event(stack_event)
-    
+
     # Check for newly executable processes
     executable_processes = discover_executable_processes(
-        cls._current_information_stack, 
+        cls._current_information_stack,
         CallableRegistry.get_all_process_names()
     )
-    
+
     # Queue processes by information gain priority
     prioritized_processes = sorted(
         executable_processes,
         key=lambda p: calculate_information_priority(p, cls._current_information_stack),
         reverse=True
     )
-    
+
     # Execute highest priority processes
     for process_name in prioritized_processes:
         execution_event = ProcessExecutionEvent(
@@ -766,7 +766,7 @@ class EntityRegistry:
     lineage_registry: Dict[UUID, List[UUID]] = Field(default_factory=dict)
     live_id_registry: Dict[UUID, Entity] = Field(default_factory=dict)
     type_registry: Dict[Type[Entity], List[UUID]] = Field(default_factory=dict)
-    
+
     @classmethod
     def register_entity_with_events(cls, entity: Entity) -> None:
         """Register entity and broadcast availability event"""
@@ -775,10 +775,10 @@ class EntityRegistry:
             raise ValueError("can only register root entities with a root_ecs_id for now")
         elif not entity.is_root_entity():
             raise ValueError("can only register root entities for now")
-        
+
         entity_tree = build_entity_tree(entity)
         cls.register_entity_tree(entity_tree)
-        
+
         # Broadcast entity creation event
         creation_event = InformationEvent(
             event_type=InformationEventType.ENTITY_CREATION,
@@ -786,14 +786,14 @@ class EntityRegistry:
             information_gain=1.0
         )
         InformationOrchestrator.register_information_event(creation_event)
-    
+
     @classmethod
     def version_entity_with_events(cls, entity: Entity, force_versioning: bool = False) -> bool:
         """Version entity with automatic event broadcasting"""
         # Original versioning logic
         if not entity.root_ecs_id:
             raise ValueError("entity has no root_ecs_id for versioning")
-        
+
         old_tree = cls.get_stored_tree(entity.root_ecs_id)
         if old_tree is None:
             cls.register_entity_with_events(entity)
@@ -804,23 +804,23 @@ class EntityRegistry:
                 modified_entities = new_tree.nodes.keys()
             else:
                 modified_entities = list(find_modified_entities(new_tree=new_tree, old_tree=old_tree))
-        
+
             typed_entities = [entity for entity in modified_entities if isinstance(entity, UUID)]
-            
+
             if len(typed_entities) > 0:
                 # Original versioning updates
                 current_root_ecs_id = new_tree.root_ecs_id
                 root_entity = new_tree.get_entity(current_root_ecs_id)
                 root_entity.update_ecs_ids()
                 new_root_ecs_id = root_entity.ecs_id
-                
+
                 new_tree.nodes.pop(current_root_ecs_id)
                 new_tree.nodes[new_root_ecs_id] = root_entity
                 new_tree.root_ecs_id = new_root_ecs_id
                 new_tree.lineage_id = root_entity.lineage_id
-                
+
                 cls.register_entity_tree(new_tree)
-                
+
                 # Broadcast entity update event
                 update_event = InformationEvent(
                     event_type=InformationEventType.ENTITY_UPDATE,
@@ -828,7 +828,7 @@ class EntityRegistry:
                     information_gain=len(typed_entities)
                 )
                 InformationOrchestrator.register_information_event(update_event)
-        
+
         return True
 ```
 
@@ -841,11 +841,11 @@ class ProcessHandler:
     def __init__(self, callable_name: str):
         self.callable_name = callable_name
         self.signature = CallableRegistry.get_signature(callable_name)
-        
+
         # Create trigger conditions based on process signature
         required_types = {param.type for param in self.signature.parameters.values()}
         output_types = {self.signature.return_type}
-        
+
         self.trigger_conditions = [
             InformationTrigger(
                 event_type=InformationEventType.STACK_UPDATE,
@@ -854,17 +854,17 @@ class ProcessHandler:
                 novel_output_types=output_types
             )
         ]
-    
+
     def __call__(self, event: InformationEvent, information_stack: List[Entity]) -> Optional[InformationEvent]:
         """Execute process if trigger conditions are met"""
         for trigger in self.trigger_conditions:
             if trigger.should_trigger(event, information_stack):
                 # Construct entity references for process execution
                 inputs = self._construct_entity_references(information_stack)
-                
+
                 # Execute through CallableRegistry
                 result_entity = CallableRegistry.execute_callable(self.callable_name, inputs)
-                
+
                 # Create process execution event
                 return InformationEvent(
                     event_type=InformationEventType.PROCESS_EXECUTION,
@@ -873,16 +873,16 @@ class ProcessHandler:
                     parent_event=event.uuid
                 )
         return None
-    
+
     def _construct_entity_references(self, information_stack: List[Entity]) -> Dict[str, str]:
         """Construct entity references for process inputs"""
         inputs = {}
         available_entities_by_type = defaultdict(list)
-        
+
         # Group entities by type
         for entity in information_stack:
             available_entities_by_type[type(entity)].append(entity)
-        
+
         # Match parameters to available entities
         for param_name, param_info in self.signature.parameters.items():
             compatible_entities = available_entities_by_type.get(param_info.type, [])
@@ -890,7 +890,7 @@ class ProcessHandler:
                 # Use most recent compatible entity
                 selected_entity = max(compatible_entities, key=lambda e: e.created_at)
                 inputs[param_name] = f"@{selected_entity.ecs_id}.untyped_data"
-        
+
         return inputs
 ```
 
@@ -904,17 +904,17 @@ class InformationGoal:
     def __init__(self, target_types: Set[Type], success_condition: Callable[[List[Entity]], bool]):
         self.target_types = target_types
         self.success_condition = success_condition
-        
+
         # Create goal evaluation handler
         self.goal_handler = GoalEvaluationHandler(self)
         InformationOrchestrator.add_process_handler(self.goal_handler)
-    
+
     def evaluate_progress(self, current_stack: List[Entity]) -> float:
         """Calculate goal progress based on available information types"""
         available_types = {type(entity) for entity in current_stack}
         achieved_types = self.target_types.intersection(available_types)
         return len(achieved_types) / len(self.target_types)
-    
+
     def is_achieved(self, current_stack: List[Entity]) -> bool:
         """Check if goal conditions are satisfied"""
         return self.success_condition(current_stack)
@@ -931,12 +931,12 @@ class GoalEvaluationHandler(ProcessHandler):
                 novel_output_types=set()
             )
         ]
-    
+
     def __call__(self, event: InformationEvent, information_stack: List[Entity]) -> Optional[InformationEvent]:
         """Evaluate goal progress and completion"""
         progress = self.goal.evaluate_progress(information_stack)
         achieved = self.goal.is_achieved(information_stack)
-        
+
         return InformationEvent(
             event_type=InformationEventType.GOAL_EVALUATION,
             phase=ProcessPhase.COMPLETION,
@@ -949,7 +949,7 @@ class GoalEvaluationHandler(ProcessHandler):
 **Natural Process Coordination**: The system achieves complex goal-directed behavior through simple reactive rules:
 
 1. **Information Stack Updates** → Trigger compatibility checking
-2. **Compatible Processes Found** → Queue by information gain priority  
+2. **Compatible Processes Found** → Queue by information gain priority
 3. **Processes Execute** → Produce new entities with provenance tracking
 4. **New Entities Added** → Trigger next wave of compatibility checking
 5. **Goal Progress Evaluated** → Continuous monitoring without explicit control

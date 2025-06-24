@@ -1,4 +1,4 @@
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
 
 setup(
     name="abstractions",
@@ -14,7 +14,7 @@ setup(
     ],
     include_package_data=True,
     entry_points={
-        'console_scripts': [
+        "console_scripts": [
             # Define any command-line scripts here
         ],
     },

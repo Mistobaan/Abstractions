@@ -4,58 +4,63 @@ Base registry implementation providing common functionality for specialized regi
 This module defines the base registry class that implements common features like
 logging, timestamps, and basic registry operations.
 """
-from typing import Dict, Any, Optional, Generic, TypeVar, Union
-from datetime import datetime, timezone
+
 import logging
+from datetime import datetime, timezone
 from io import StringIO
+from typing import Any, Dict, Generic, Optional, TypeVar, Union
 from uuid import UUID
 
-T = TypeVar('T')
+T = TypeVar("T")
+
 
 class BaseRegistry(Generic[T]):
     """
     Base class for registry implementations.
-    
+
     Provides common functionality for registry operations including:
     - Singleton pattern
     - Logging setup and management
     - Timestamped operations
     - Basic registry operations
-    
+
     Type Args:
         T: Type of items stored in registry
     """
+
     _instance = None
     _registry: Dict[Union[str, UUID], T] = {}
     _timestamps: Dict[Union[str, UUID], datetime] = {}
-    
-    def __new__(cls) -> 'BaseRegistry':
+
+    def __new__(cls) -> "BaseRegistry":
         if cls._instance is None:
             cls._instance = super().__new__(cls)
             cls._setup_logging()
         return cls._instance
-    
+
     @classmethod
     def _setup_logging(cls) -> None:
         """Initialize logging for this registry instance."""
         registry_name = cls.__name__
         cls._log_stream = StringIO()
         cls._logger = logging.getLogger(registry_name)
-        
+
         if not cls._logger.handlers:
             handler = logging.StreamHandler(cls._log_stream)
-            handler.setFormatter(logging.Formatter(
-                '%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                datefmt='%Y-%m-%d %H:%M:%S'
-            ))
+            handler.setFormatter(
+                logging.Formatter(
+                    "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+                    datefmt="%Y-%m-%d %H:%M:%S",
+                )
+            )
             cls._logger.addHandler(handler)
             cls._logger.setLevel(logging.INFO)
-    
+
     @classmethod
     def get_logs(cls) -> str:
         """Get all logs as text."""
         return cls._log_stream.getvalue()
-    
+
     @classmethod
     def clear_logs(cls) -> None:
         """Clear all logs."""
@@ -93,5 +98,5 @@ class BaseRegistry(Generic[T]):
         return {
             "total_items": len(cls._registry),
             "oldest_item": min(cls._timestamps.values()) if cls._timestamps else None,
-            "newest_item": max(cls._timestamps.values()) if cls._timestamps else None
+            "newest_item": max(cls._timestamps.values()) if cls._timestamps else None,
         }

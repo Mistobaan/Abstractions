@@ -15,7 +15,7 @@ Think of a Typed Process as a **molecular machine** in a cell - it can only oper
 TypedProcess := (InputSignature, OutputSignature, Transform, Prerequisites)
 where:
   InputSignature  := ComposedPointer(MemoryStack)
-  OutputSignature := NewType ∉ MemoryStack.types  
+  OutputSignature := NewType ∉ MemoryStack.types
   Transform       := InputSignature → OutputSignature
   Prerequisites   := ConstructibilityConstraints
 ```
@@ -30,7 +30,7 @@ analyze_data(dataset="made up dataset", method="invented method")
 // VALID Typed Process:
 analyze_data(
   dataset=pointer_to(memory_stack[42]),     // Must exist
-  method=pointer_to(memory_stack[17])       // Must exist  
+  method=pointer_to(memory_stack[17])       // Must exist
 ) → AnalysisResult                          // New type
 ```
 
@@ -97,7 +97,7 @@ ComposedPointer := {
 **Hierarchical Pointers**: References to sub-components of complex structures
 ```
 ComposedPointer := {
-  type: "hierarchical", 
+  type: "hierarchical",
   target: StackAddress(42),
   path: ["user_data", "financial_info", "account_balance"],
   access_pattern: "field_access"
@@ -118,7 +118,7 @@ ComposedPointer := {
 
 **Mechanical Process**:
 1. **Process Selection**: Agent identifies a potentially useful Typed Process
-2. **Input Analysis**: System determines what information types the process requires  
+2. **Input Analysis**: System determines what information types the process requires
 3. **Availability Check**: Search memory stack for entries that can satisfy requirements
 4. **Composition Strategy**: If multiple entries needed, determine how to combine them
 5. **Pointer Construction**: Build explicit pointer structure that maps requirements to available data
@@ -130,20 +130,20 @@ ComposedPointer := {
 // Traditional Agent (PRONE TO FAILURE):
 agent: "I need to analyze sales data"
 agent: calls analyze_sales(
-  data="Q4 sales figures",           // HALLUCINATED 
+  data="Q4 sales figures",           // HALLUCINATED
   method="advanced regression",      // HALLUCINATED
-  timeframe="last 6 months"         // HALLUCINATED  
+  timeframe="last 6 months"         // HALLUCINATED
 )
 
 // Typed Process Agent (FAILURE IMPOSSIBLE):
 agent: "I need to analyze sales data"
 system: Available data in memory stack:
   [23] CSV: raw_sales_data.csv
-  [31] TimeRange: Q1_2024_range  
+  [31] TimeRange: Q1_2024_range
   [47] AnalysisMethod: linear_regression_config
 system: Can construct analyze_sales(
   data=pointer_to(23),
-  method=pointer_to(47), 
+  method=pointer_to(47),
   timeframe=pointer_to(31)
 ) → SalesAnalysis
 ```
@@ -165,7 +165,7 @@ The **Information Gain Constraint** transforms agent behavior from aimless explo
    - **Mechanism**: Type system verifies that pointer composition can satisfy input signature
    - **Failure Mode Prevented**: Agents cannot attempt operations on non-existent data
 
-**2. Novel Output**: `process.output.type ∉ memory_stack.types`  
+**2. Novel Output**: `process.output.type ∉ memory_stack.types`
    - **Meaning**: Process must produce a new type of information not already available
    - **Mechanism**: Type checker scans existing stack for output type collisions
    - **Progress Guarantee**: Prevents redundant computation and ensures forward movement
@@ -181,13 +181,13 @@ The **Information Gain Constraint** transforms agent behavior from aimless explo
 ```
 // Available memory stack:
 [15] UserQuery: "What are our top customers?"
-[22] DataSet: raw_customer_data.csv  
+[22] DataSet: raw_customer_data.csv
 [31] AnalysisMethod: revenue_ranking
 
 // VALID process (meets all constraints):
 generate_customer_ranking(
   data=pointer_to(22),           // ✓ Constructible
-  method=pointer_to(31),         // ✓ Constructible  
+  method=pointer_to(31),         // ✓ Constructible
   query=pointer_to(15)           // ✓ Constructible
 ) → CustomerRanking              // ✓ Novel type, ✓ Positive entropy
 
@@ -218,7 +218,7 @@ InfoGain(process, stack, goal) := H(Goal | stack) - H(Goal | stack ∪ process.o
 - **Low Value**: Goal is well-understood given current information - close to completion
 - **Zero Value**: Goal is completely determined by current information - already achieved
 
-**H(Goal | stack ∪ process.output)**: Predicted uncertainty after process execution  
+**H(Goal | stack ∪ process.output)**: Predicted uncertainty after process execution
 - **Calculation**: Uses learned world model to estimate entropy reduction
 - **Uncertainty**: Model may be wrong about actual information gain
 - **Learning**: Actual outcomes update world model predictions
@@ -240,7 +240,7 @@ Candidate Processes:
    - Predicted H(Goal | stack + LibraryComparison) = 3.1 bits
    - InfoGain = 4.2 - 3.1 = 1.1 bits
 
-2. write_basic_scraper(...) → CodeDraft  
+2. write_basic_scraper(...) → CodeDraft
    - Predicted H(Goal | stack + CodeDraft) = 2.8 bits
    - InfoGain = 4.2 - 2.8 = 1.4 bits  ← Higher gain, selected
 
@@ -267,8 +267,8 @@ Process availability creates a **dynamic computational landscape** that changes 
 **Availability Function:**
 ```
 Available(stack, goal) := {
-  p ∈ AllProcesses | 
-    can_construct(p.input, stack) ∧ 
+  p ∈ AllProcesses |
+    can_construct(p.input, stack) ∧
     p.output.type ∉ stack.types ∧
     InfoGain(p, stack, goal) > threshold
 }
@@ -278,7 +278,7 @@ Available(stack, goal) := {
 
 **Constructibility Constraint**: As the memory stack grows, MORE processes become available
 - **Early Stage**: Few processes available (limited input data)
-- **Middle Stage**: Rich process ecosystem emerges (many data types to combine)  
+- **Middle Stage**: Rich process ecosystem emerges (many data types to combine)
 - **Late Stage**: Specialized processes become accessible (complex inputs available)
 
 **Novelty Constraint**: As the memory stack grows, FEWER processes remain available
@@ -298,7 +298,7 @@ Available(stack, goal) := {
 Stack: [(UserQuery, "analyze customer churn", 0)]
 Available: [
   load_data(...) → DataSet,           // Basic data loading
-  research_methods(...) → Literature, // Background research  
+  research_methods(...) → Literature, // Background research
   define_metrics(...) → Metrics       // Problem specification
 ]
 Unavailable: [
@@ -315,7 +315,7 @@ Stack: [
   (DataSet, customer_data.csv, 1)
 ]
 Available: [
-  explore_data(...) → DataSummary,    // Now constructible  
+  explore_data(...) → DataSummary,    // Now constructible
   clean_data(...) → CleanDataSet,     // Now constructible
   feature_engineering(...) → Features, // Now constructible
   define_metrics(...) → Metrics       // Still available
@@ -331,7 +331,7 @@ Unavailable: [
 Stack: [
   ...,
   (Features, engineered_features, 5),
-  (Metrics, churn_definition, 6)  
+  (Metrics, churn_definition, 6)
 ]
 Available: [
   train_model(...) → TrainedModel,    // NOW constructible
@@ -368,7 +368,7 @@ Goals in this framework are **information-theoretic targets** rather than tradit
 ```
 Goal := {
   target_types: Set[Type],              // What information types are needed
-  target_values: PartialSpecification,  // Constraints on those values  
+  target_values: PartialSpecification,  // Constraints on those values
   success_condition: MemoryStack → Boolean,  // Completion check
   entropy_model: StackState → Float     // Uncertainty quantification
 }
@@ -389,7 +389,7 @@ target_types = {
 
 **Target Values**: Provides **partial constraints** on the target information content
 ```
-// Research goal  
+// Research goal
 target_values = {
   Insight.novelty > 0.8,          // Must be novel finding
   Evidence.confidence > 0.95,     // High statistical confidence
@@ -400,16 +400,16 @@ target_values = {
 
 **Success Condition**: **Computational predicate** that determines goal achievement
 ```
-success_condition(stack) := 
+success_condition(stack) :=
   all_types_present(stack, target_types) ∧
-  all_constraints_satisfied(stack, target_values) ∧  
+  all_constraints_satisfied(stack, target_values) ∧
   coherence_check(stack) ∧
   quality_threshold_met(stack)
 ```
 
 **Entropy Model**: **Learned function** that estimates remaining uncertainty toward goal
 ```
-entropy_model(stack) := 
+entropy_model(stack) :=
   learned_neural_network(
     input=stack_state_encoding(stack),
     output=estimated_remaining_bits
@@ -423,12 +423,12 @@ entropy_model(stack) :=
 Goal_initial: "Build a recommendation system"
 └─ High entropy: many unknowns about requirements
 
-// Refined goal (after user interaction)  
+// Refined goal (after user interaction)
 Goal_refined: "Build collaborative filtering recommender for movies"
 └─ Medium entropy: architecture clearer, details remain
 
 // Specific goal (after technical analysis)
-Goal_specific: "Implement matrix factorization with implicit feedback"  
+Goal_specific: "Implement matrix factorization with implicit feedback"
 └─ Low entropy: clear technical target
 ```
 
@@ -456,14 +456,14 @@ next_process = argmax_{p ∈ Available(stack, goal)} InfoGain(p, stack, goal)
 - **Example**: Research multiple approaches, survey existing solutions
 - **Information Pattern**: Stack grows rapidly with diverse but shallow information
 
-**Focused Investigation Phase**: When `H(Goal | stack)` is medium (goal partially clear)  
+**Focused Investigation Phase**: When `H(Goal | stack)` is medium (goal partially clear)
 - **Strategy**: Prefer processes with high **targeted information gain**
 - **Behavior**: Deep dives into promising directions identified during exploration
 - **Example**: Detailed technical analysis of chosen approach
 - **Information Pattern**: Stack grows selectively with deep, specialized information
 
 **Optimization Phase**: When `H(Goal | stack)` is low (goal nearly clear)
-- **Strategy**: Prefer processes with high **precision information gain**  
+- **Strategy**: Prefer processes with high **precision information gain**
 - **Behavior**: Fine-tuning, validation, edge case handling
 - **Example**: Performance optimization, error handling, documentation
 - **Information Pattern**: Stack grows slowly with highly specific, quality-focused information
@@ -481,7 +481,7 @@ High-gain processes:
 Selection: analyze_requirements() - highest gain
 ```
 
-**Phase 2: Medium Entropy (H = 3.1 bits)**  
+**Phase 2: Medium Entropy (H = 3.1 bits)**
 ```
 Current understanding: "REST API for user management with authentication"
 High-gain processes:
@@ -496,7 +496,7 @@ Selection: design_database_schema() - addresses core uncertainty
 ```
 Current understanding: "FastAPI + PostgreSQL + JWT auth, schema defined"
 High-gain processes:
-1. implement_core_handlers() → APIImplementation (gain: 0.4 bits) ← Selected  
+1. implement_core_handlers() → APIImplementation (gain: 0.4 bits) ← Selected
 2. write_tests() → TestSuite (gain: 0.3 bits)
 3. setup_deployment() → DeploymentConfig (gain: 0.2 bits)
 
@@ -505,7 +505,7 @@ Selection: implement_core_handlers() - final major uncertainty
 
 **Adaptive Intelligence**: The agent's behavior **automatically adapts** to its current understanding level:
 - **When lost**: Explores broadly to reduce high-level uncertainty
-- **When focused**: Investigates deeply in promising directions  
+- **When focused**: Investigates deeply in promising directions
 - **When close**: Optimizes and polishes toward completion
 
 **Information Thermodynamics**: The entropy-driven approach creates **information thermodynamics** where the agent flows naturally from high-entropy (confused) states toward low-entropy (clear) states, with goal achievement as the entropy minimum.
@@ -533,13 +533,13 @@ The agent's decision space forms a **hypergraph** where nodes represent knowledg
 ```
 Nodes:
 S₁: [UserQuery: "optimize database"]
-S₂: [UserQuery: "optimize database", DatabaseSchema: schema.sql] 
+S₂: [UserQuery: "optimize database", DatabaseSchema: schema.sql]
 S₃: [UserQuery: "optimize database", PerformanceMetrics: current_stats]
 S₄: [UserQuery, DatabaseSchema, PerformanceMetrics, IndexAnalysis: recommendations]
 
 Hyperedges:
 E₁: {S₁} → S₂ via load_schema_process
-E₂: {S₁} → S₃ via collect_metrics_process  
+E₂: {S₁} → S₃ via collect_metrics_process
 E₃: {S₂, S₃} → S₄ via analyze_performance_process  // Multi-input hyperedge
 ```
 
@@ -587,11 +587,11 @@ Initial State: [UserRequest: "segment customers"]
 
 Step 1: Expand initial state
 ├─ load_customer_data() → [UserRequest, CustomerData] (f=3.2)
-├─ research_segmentation() → [UserRequest, Literature] (f=3.8)  
+├─ research_segmentation() → [UserRequest, Literature] (f=3.8)
 └─ define_segments() → [UserRequest, SegmentDefinition] (f=4.1)
 Select: load_customer_data (lowest f-score)
 
-Step 2: Expand data loading state  
+Step 2: Expand data loading state
 ├─ explore_data() → [UserRequest, CustomerData, DataSummary] (f=2.1)
 ├─ clean_data() → [UserRequest, CustomerData, CleanData] (f=2.4)
 └─ feature_engineering() → [UserRequest, CustomerData, Features] (f=2.8)
@@ -599,7 +599,7 @@ Select: explore_data (lowest f-score)
 
 Step 3: Multi-input expansion
 ├─ {explore_data, research_segmentation} → advanced_analysis (f=1.2)
-├─ statistical_analysis() → [UserRequest, CustomerData, DataSummary, Statistics] (f=1.8)  
+├─ statistical_analysis() → [UserRequest, CustomerData, DataSummary, Statistics] (f=1.8)
 └─ visualization() → [UserRequest, CustomerData, DataSummary, Plots] (f=2.0)
 Select: advanced_analysis (combines previous work optimally)
 ```
@@ -624,7 +624,7 @@ Traditional reinforcement learning suffers from **sparse rewards** and **tempora
 
 **Episode Completion**: When agent reaches terminal state (success or failure)
 1. **Information Value Computation**: Calculate how much each memory stack entry actually contributed to goal achievement
-2. **Temporal Credit Assignment**: Backpropagate information value through the execution trace  
+2. **Temporal Credit Assignment**: Backpropagate information value through the execution trace
 3. **World Model Update**: Refine entropy estimates based on observed information contributions
 4. **Process Value Learning**: Update expectations about which processes provide valuable information
 
@@ -634,9 +634,9 @@ Traditional reinforcement learning suffers from **sparse rewards** and **tempora
 
 **Information Value Calculation**:
 ```
-InfoValue(entry_i, terminal_state) := 
+InfoValue(entry_i, terminal_state) :=
   mutual_information(entry_i, goal_achievement) +
-  causal_contribution(entry_i, subsequent_entries) +  
+  causal_contribution(entry_i, subsequent_entries) +
   temporal_importance(entry_i, decision_sequence)
 ```
 
@@ -647,12 +647,12 @@ InfoValue(entry_i, terminal_state) :=
 MI(entry_i, goal) = H(goal) - H(goal | entry_i)
 ```
 - **High MI**: Information strongly predicts goal outcome
-- **Low MI**: Information irrelevant to goal achievement  
+- **Low MI**: Information irrelevant to goal achievement
 - **Example**: In code generation task, working code has high MI with success
 
 **Causal Contribution**: How much the entry enabled subsequent valuable information
 ```
-CC(entry_i) = Σ_{j>i} InfoValue(entry_j) × causal_weight(i→j)  
+CC(entry_i) = Σ_{j>i} InfoValue(entry_j) × causal_weight(i→j)
 ```
 - **Foundation Value**: Early entries that enable valuable later work
 - **Multiplier Effect**: Information that unlocks multiple downstream discoveries
@@ -671,18 +671,18 @@ TI(entry_i) = temporal_decay(timestamp_i) × urgency_weight(entry_i)
 function backpropagate_information_value(episode_trace, terminal_outcome):
     # Start from terminal state
     current_value = terminal_outcome.success_value
-    
+
     # Work backwards through execution trace
     for step in reversed(episode_trace):
         # Calculate this step's information contribution
         step.info_value = calculate_contribution(step, current_value)
-        
+
         # Update world model expectations
         update_entropy_estimates(step.memory_state, step.info_value)
-        
-        # Update process value estimates  
+
+        # Update process value estimates
         update_process_expectations(step.process_used, step.info_value)
-        
+
         # Propagate value to predecessor states
         current_value += step.info_value
 ```
@@ -691,7 +691,7 @@ function backpropagate_information_value(episode_trace, terminal_outcome):
 ```
 Execution Trace:
 1. load_error_logs() → ErrorData (predicted_value: 0.3, actual_value: 0.8)
-2. search_documentation() → DocsInfo (predicted: 0.5, actual: 0.1)  
+2. search_documentation() → DocsInfo (predicted: 0.5, actual: 0.1)
 3. reproduce_error() → ReproCase (predicted: 0.7, actual: 1.2)
 4. analyze_stack_trace() → BugLocation (predicted: 0.9, actual: 1.5)
 5. implement_fix() → Solution (predicted: 1.0, actual: 1.0)
@@ -699,7 +699,7 @@ Execution Trace:
 Learning Updates:
 - load_error_logs: Higher value than expected → increase entropy reduction estimate
 - search_documentation: Lower value → decrease estimation for this problem type
-- reproduce_error: Much higher value → major update to reproduction process value  
+- reproduce_error: Much higher value → major update to reproduction process value
 - analyze_stack_trace: Higher value → stack traces are very informative
 - implement_fix: As expected → no update needed
 ```
@@ -715,7 +715,7 @@ new_estimate = α × actual_uncertainty_reduction + (1-α) × old_estimate
 **Process Value Learning**: Update expectations about information gain from different process types
 ```
 expected_gain[process_type] = update_running_average(
-    expected_gain[process_type], 
+    expected_gain[process_type],
     observed_gain
 )
 ```
@@ -748,7 +748,7 @@ value_model[process_type][context_features] = update_conditional_expectation(
 ### 4.2 Information Value Function
 
 ```
-InfoValue(entry_i, terminal_state) := 
+InfoValue(entry_i, terminal_state) :=
   mutual_information(entry_i, goal_achievement)
 ```
 
@@ -776,20 +776,20 @@ The MemoryStack Manager handles all information storage and retrieval operations
 class MemoryStackManager:
     def append(self, entry_type: Type, value: Any, metadata: Dict) -> StackAddress:
         """Add new information with automatic indexing and provenance tracking"""
-        
+
     def resolve_pointer(self, pointer: ComposedPointer) -> ResolvedValue:
         """Convert pointer reference to actual data with type checking"""
-        
+
     def can_construct(self, input_signature: InputType, stack: MemoryStack) -> bool:
         """Check if required input can be built from available data"""
-        
+
     def compose_input(self, signature: InputType, strategy: CompositionStrategy) -> ComposedPointer:
         """Build complex inputs from multiple stack entries"""
 ```
 
 **Implementation Details**:
 - **Storage Backend**: Append-only log with hierarchical indexing
-- **Type System**: Runtime type checking with dependent type support  
+- **Type System**: Runtime type checking with dependent type support
 - **Pointer Resolution**: Efficient lookup with caching for complex compositions
 - **Garbage Collection**: None needed - immutable entries never deleted
 - **Concurrency**: Multiple readers, single writer with atomic appends
@@ -803,13 +803,13 @@ The Process Registry maintains the **dynamic catalog** of available processes an
 class ProcessRegistry:
     def register_process(self, process: TypedProcess) -> ProcessId:
         """Add new process to the registry with type signature validation"""
-        
+
     def get_available(self, stack: MemoryStack, goal: Goal) -> List[ProcessId]:
         """Filter processes by constructibility and information gain"""
-        
+
     def estimate_info_gain(self, process: ProcessId, stack: MemoryStack, goal: Goal) -> Float:
         """Predict information gain from process execution"""
-        
+
     def execute_process(self, process: ProcessId, inputs: ComposedPointer) -> ProcessResult:
         """Run process with type checking and error handling"""
 ```
@@ -830,13 +830,13 @@ The Navigation Engine implements the **A* hypergraph search** with information-t
 class NavigationEngine:
     def plan_next_action(self, current_state: AgentState, goal: Goal) -> ProcessId:
         """Select optimal next process using A* with entropy heuristic"""
-        
+
     def expand_frontier(self, state: AgentState) -> List[AgentState]:
         """Generate successor states from available processes"""
-        
+
     def update_heuristic(self, state: AgentState, observed_gain: Float) -> None:
         """Refine entropy estimates based on actual outcomes"""
-        
+
     def prune_search_space(self, frontier: List[AgentState], goal: Goal) -> List[AgentState]:
         """Remove unpromising states to maintain computational tractability"""
 ```
@@ -857,13 +857,13 @@ The Learning System implements **Rudder-style credit assignment** and continuous
 class LearningSystem:
     def record_episode(self, trace: ExecutionTrace, outcome: TerminalState) -> None:
         """Store complete episode for later analysis"""
-        
+
     def backpropagate_values(self, episode: Episode) -> Dict[StackAddress, Float]:
         """Calculate information value for each memory entry"""
-        
+
     def update_world_model(self, value_assignments: Dict[StackAddress, Float]) -> None:
         """Refine entropy estimates and process value predictions"""
-        
+
     def get_improved_estimates(self, state: AgentState, goal: Goal) -> Float:
         """Return learned entropy estimate for state-goal pair"""
 ```
@@ -885,12 +885,12 @@ The Process Execution Pipeline orchestrates the **complete decision-making cycle
 ```python
 def assess_current_state(agent: GoalDirectedAgent) -> StateAssessment:
     """Comprehensive analysis of current cognitive state"""
-    
+
     # Analyze memory stack composition
     available_types = extract_types(agent.memory_stack)
     information_density = calculate_entropy(agent.memory_stack)
     goal_progress = estimate_goal_proximity(agent.memory_stack, agent.goal)
-    
+
     # Compute available action space
     constructible_processes = filter_by_constructibility(
         all_processes, agent.memory_stack
@@ -898,7 +898,7 @@ def assess_current_state(agent: GoalDirectedAgent) -> StateAssessment:
     novel_processes = filter_by_novelty(
         constructible_processes, agent.memory_stack
     )
-    
+
     return StateAssessment(
         current_types=available_types,
         information_content=information_density,
@@ -911,30 +911,30 @@ def assess_current_state(agent: GoalDirectedAgent) -> StateAssessment:
 **Step 2: Information Gain Estimation**
 ```python
 def estimate_information_gains(
-    processes: List[ProcessId], 
-    state: AgentState, 
+    processes: List[ProcessId],
+    state: AgentState,
     goal: Goal
 ) -> Dict[ProcessId, Float]:
     """Predict information value for each available process"""
-    
+
     gain_estimates = {}
     current_entropy = agent.world_model.estimate_entropy(state.memory_stack, goal)
-    
+
     for process in processes:
         # Predict output type and content
         predicted_output = agent.world_model.predict_output(process, state)
-        
+
         # Estimate entropy after process execution
         hypothetical_stack = state.memory_stack + predicted_output
         future_entropy = agent.world_model.estimate_entropy(hypothetical_stack, goal)
-        
+
         # Calculate expected information gain
         gain_estimates[process] = current_entropy - future_entropy
-        
+
         # Adjust for uncertainty in prediction
         prediction_confidence = agent.world_model.get_confidence(process, state)
         gain_estimates[process] *= prediction_confidence
-    
+
     return gain_estimates
 ```
 
@@ -947,26 +947,26 @@ def select_optimal_process(
     goal: Goal
 ) -> ProcessId:
     """Choose process that minimizes expected path cost to goal"""
-    
+
     # Calculate f-scores for each process
     f_scores = {}
     for process in available_processes:
         # g(state): actual cost so far
         g_cost = state.computational_cost + get_process_cost(process)
-        
+
         # h(state): heuristic remaining cost (entropy-based)
         current_entropy = agent.world_model.estimate_entropy(state.memory_stack, goal)
         predicted_output = agent.world_model.predict_output(process, state)
         future_stack = state.memory_stack + predicted_output
         future_entropy = agent.world_model.estimate_entropy(future_stack, goal)
         h_cost = future_entropy  # Remaining uncertainty as cost
-        
+
         # f(state) = g(state) + h(state)
         f_scores[process] = g_cost + h_cost
-    
+
     # Select process with minimum f-score
     optimal_process = min(f_scores.keys(), key=lambda p: f_scores[p])
-    
+
     # Log decision reasoning for learning
     agent.learning_system.record_decision(
         state=state,
@@ -974,28 +974,28 @@ def select_optimal_process(
         choice=optimal_process,
         reasoning=f_scores
     )
-    
+
     return optimal_process
 ```
 
 **Step 4: Pointer Composition**
 ```python
 def compose_process_input(
-    process: ProcessId, 
+    process: ProcessId,
     memory_stack: MemoryStack
 ) -> ComposedPointer:
     """Build valid input from memory stack entries"""
-    
+
     input_signature = get_input_signature(process)
-    
+
     # Find optimal composition strategy
     composition_candidates = find_composition_strategies(
         input_signature, memory_stack
     )
-    
+
     best_composition = None
     best_score = float('-inf')
-    
+
     for candidate in composition_candidates:
         # Score based on information quality and recency
         score = (
@@ -1003,11 +1003,11 @@ def compose_process_input(
             candidate.recency_bonus * 0.3 +
             candidate.type_match_quality * 0.3
         )
-        
+
         if score > best_score:
             best_score = score
             best_composition = candidate
-    
+
     # Construct the actual pointer
     composed_pointer = ComposedPointer(
         strategy=best_composition.strategy,
@@ -1015,10 +1015,10 @@ def compose_process_input(
         auxiliary_entries=best_composition.auxiliary_sources,
         composition_function=best_composition.combiner
     )
-    
+
     # Validate pointer before returning
     assert validate_pointer_composition(composed_pointer, input_signature)
-    
+
     return composed_pointer
 ```
 
@@ -1030,25 +1030,25 @@ def execute_process_safely(
     agent: GoalDirectedAgent
 ) -> ProcessResult:
     """Execute process with comprehensive monitoring and error handling"""
-    
+
     start_time = time.time()
-    
+
     try:
         # Pre-execution validation
         validate_input_types(inputs, get_input_signature(process))
         validate_computational_budget(process, agent.remaining_budget)
-        
+
         # Resolve pointers to actual values
         resolved_inputs = agent.memory_manager.resolve_pointer(inputs)
-        
+
         # Execute the process
         with resource_monitor() as monitor:
             raw_output = invoke_process(process, resolved_inputs)
-        
+
         # Post-execution validation
         validate_output_type(raw_output, get_output_signature(process))
         validate_information_content(raw_output)  # Ensure non-trivial output
-        
+
         # Package result with metadata
         execution_metadata = ExecutionMetadata(
             process_id=process,
@@ -1057,14 +1057,14 @@ def execute_process_safely(
             input_provenance=inputs.get_provenance(),
             quality_metrics=assess_output_quality(raw_output)
         )
-        
+
         return ProcessResult(
             output_value=raw_output,
             output_type=get_output_signature(process),
             metadata=execution_metadata,
             success=True
         )
-        
+
     except ProcessExecutionError as e:
         # Log failure for learning
         agent.learning_system.record_failure(
@@ -1073,7 +1073,7 @@ def execute_process_safely(
             error=e,
             context=agent.get_current_state()
         )
-        
+
         return ProcessResult(
             output_value=None,
             output_type=None,
@@ -1090,7 +1090,7 @@ def update_memory_stack(
     agent: GoalDirectedAgent
 ) -> StackAddress:
     """Add new information to memory stack with full provenance tracking"""
-    
+
     if not result.success:
         # Handle failure case
         failure_entry = FailureRecord(
@@ -1099,7 +1099,7 @@ def update_memory_stack(
             error_message=str(result.error),
             context_snapshot=agent.get_current_state()
         )
-        
+
         return agent.memory_manager.append(
             entry_type=FailureRecord,
             value=failure_entry,
@@ -1109,7 +1109,7 @@ def update_memory_stack(
                 "timestamp": time.time()
             }
         )
-    
+
     # Success case - add valuable new information
     new_address = agent.memory_manager.append(
         entry_type=result.output_type,
@@ -1123,11 +1123,11 @@ def update_memory_stack(
             "information_content": calculate_entropy(result.output_value)
         }
     )
-    
+
     # Update agent's internal state
     agent.computational_budget -= result.metadata.resource_usage.total_cost
     agent.total_information_gathered += result.metadata.quality_metrics.information_gain
-    
+
     return new_address
 ```
 
@@ -1135,7 +1135,7 @@ def update_memory_stack(
 ```python
 def check_goal_convergence(agent: GoalDirectedAgent) -> ConvergenceResult:
     """Determine if goal has been achieved or if progress has stalled"""
-    
+
     # Check explicit success condition
     if agent.goal.success_condition(agent.memory_stack):
         return ConvergenceResult(
@@ -1144,25 +1144,25 @@ def check_goal_convergence(agent: GoalDirectedAgent) -> ConvergenceResult:
             remaining_entropy=0.0,
             completion_evidence=extract_goal_evidence(agent.memory_stack, agent.goal)
         )
-    
+
     # Check if goal is achievable with current information
     current_entropy = agent.world_model.estimate_entropy(
         agent.memory_stack, agent.goal
     )
-    
+
     if current_entropy < agent.goal.completion_threshold:
         return ConvergenceResult(
-            status="NEAR_SUCCESS", 
+            status="NEAR_SUCCESS",
             confidence=0.8,
             remaining_entropy=current_entropy,
             next_steps=suggest_completion_steps(agent.memory_stack, agent.goal)
         )
-    
+
     # Check for stagnation
     recent_entropy_reduction = calculate_recent_progress(
         agent.entropy_history, window_size=5
     )
-    
+
     if recent_entropy_reduction < agent.stagnation_threshold:
         return ConvergenceResult(
             status="STAGNATED",
@@ -1170,7 +1170,7 @@ def check_goal_convergence(agent: GoalDirectedAgent) -> ConvergenceResult:
             remaining_entropy=current_entropy,
             suggestions=suggest_alternative_approaches(agent)
         )
-    
+
     # Still making progress
     return ConvergenceResult(
         status="IN_PROGRESS",
@@ -1184,7 +1184,7 @@ def check_goal_convergence(agent: GoalDirectedAgent) -> ConvergenceResult:
 ```python
 def execute_full_pipeline(agent: GoalDirectedAgent) -> PipelineResult:
     """Complete decision-action cycle"""
-    
+
     # Execute each step in sequence
     state_assessment = assess_current_state(agent)
     gain_estimates = estimate_information_gains(
@@ -1197,14 +1197,14 @@ def execute_full_pipeline(agent: GoalDirectedAgent) -> PipelineResult:
     execution_result = execute_process_safely(selected_process, composed_input, agent)
     new_address = update_memory_stack(execution_result, agent)
     convergence_status = check_goal_convergence(agent)
-    
+
     # Update agent state for next iteration
     agent.update_state(
         new_memory_entry=new_address,
         execution_result=execution_result,
         convergence_status=convergence_status
     )
-    
+
     return PipelineResult(
         action_taken=selected_process,
         information_gained=execution_result.metadata.quality_metrics.information_gain,
@@ -1221,7 +1221,7 @@ This pipeline creates a **complete cognitive cycle** that transforms uncertain g
 
 **Theorem**: Under finite type spaces and positive information gain constraints, Goal-Directed Typed Processes converge to goal states in finite time.
 
-**Proof Sketch**: 
+**Proof Sketch**:
 - Monotonic information increase + finite type space → finite state space
 - A* optimality + positive gain → guaranteed progress toward minimum entropy
 
@@ -1271,7 +1271,7 @@ The marriage of computational mechanics and formal type theory creates a practic
 
 **Key Contributions:**
 - Elimination of hallucinated inputs through pointer-only composition
-- Information-theoretic formalization of goal-directed behavior  
+- Information-theoretic formalization of goal-directed behavior
 - Hypergraph search with entropy-based heuristics
 - Rudder-style credit assignment for world model learning
 - Convergence guarantees for finite type spaces

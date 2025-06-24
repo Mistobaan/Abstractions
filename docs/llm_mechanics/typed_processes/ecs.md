@@ -9,7 +9,7 @@ The Goal-Directed Typed Processes framework provides the theoretical foundation 
 **Core Insight**: Instead of building abstract categorical structures, we implement the information-theoretic principles through **practical software engineering patterns** that naturally enforce the constraints we need:
 
 - **Entity Component System** → Memory Stack with perfect provenance
-- **Callable Registry** → Process execution with automatic tracing  
+- **Callable Registry** → Process execution with automatic tracing
 - **Entity References** → Pointer-only composition with type safety
 - **Automatic Versioning** → Information gain measurement and monotonic growth
 
@@ -53,7 +53,7 @@ customer_data = Entity(
 
 # Processed entity with tracked provenance
 customer_analysis = Entity(
-    ecs_id=uuid4(), 
+    ecs_id=uuid4(),
     segment_classification="high_value",
     confidence_score=0.87,
     attribute_source={
@@ -92,7 +92,7 @@ EntityEdge(
 
 **Container Edges**: References within lists, dictionaries, sets, or tuples
 ```python
-# customer.order_history[2] → specific_order_entity  
+# customer.order_history[2] → specific_order_entity
 EntityEdge(
     source_id=customer.ecs_id,
     target_id=order.ecs_id,
@@ -126,7 +126,7 @@ The **EntityRegistry** serves as the **global coordination layer** for all infor
 ```python
 class EntityRegistry:
     tree_registry: Dict[UUID, EntityTree]              # root_ecs_id → complete tree
-    lineage_registry: Dict[UUID, List[UUID]]          # lineage_id → version history  
+    lineage_registry: Dict[UUID, List[UUID]]          # lineage_id → version history
     live_id_registry: Dict[UUID, Entity]              # live_id → current entity
     type_registry: Dict[Type[Entity], List[UUID]]     # entity_type → lineage_ids
 ```
@@ -138,10 +138,10 @@ class EntityRegistry:
 def version_entity(self, entity: Entity) -> bool:
     old_tree = self.get_stored_tree(entity.root_ecs_id)
     new_tree = build_entity_tree(entity)
-    
+
     # Detect actual information changes
     modified_entities = find_modified_entities(new_tree, old_tree)
-    
+
     # Only version if real changes occurred
     if modified_entities:
         # Update ecs_ids for changed entities
@@ -155,7 +155,7 @@ def version_entity(self, entity: Entity) -> bool:
 ```python
 def find_modified_entities(new_tree: EntityTree, old_tree: EntityTree) -> Set[UUID]:
     # Compare node sets (added/removed entities)
-    # Compare edge sets (moved entities) 
+    # Compare edge sets (moved entities)
     # Compare attributes (modified content)
     # Return entities that actually gained information
 ```
@@ -177,7 +177,7 @@ The **CallableRegistry** implements the Process Registry from our theoretical fr
 @CallableRegistry.register("analyze_customer_segments")
 def segment_analysis(
     customer_data: str,           # Input type constraint
-    segmentation_method: str,     # Input type constraint  
+    segmentation_method: str,     # Input type constraint
     confidence_threshold: float   # Input type constraint
 ) -> Entity:                     # Output type guarantee
     # Process logic with automatic entity tracing
@@ -213,7 +213,7 @@ The **entity reference system** implements the critical "no hallucination" const
 # Execution with entity references
 execute_callable("analyze_customer_segments", {
     "customer_data": "@f65cf3bd-9392-499f-8f57-dba701f5069c.csv_content",
-    "segmentation_method": "@a1b2c3d4-5678-90ef-1234-567890abcdef.algorithm_name", 
+    "segmentation_method": "@a1b2c3d4-5678-90ef-1234-567890abcdef.algorithm_name",
     "confidence_threshold": 0.85  # Direct values still allowed for primitives
 })
 ```
@@ -270,22 +270,22 @@ def entity_tracer(func):
         # 1. Pre-execution entity state capture
         input_entities = extract_entities_from_args(args, kwargs)
         pre_execution_snapshots = capture_entity_states(input_entities)
-        
+
         # 2. Function execution
         result = func(*args, **kwargs)
-        
+
         # 3. Post-execution change detection
         post_execution_states = capture_entity_states(input_entities)
         changed_entities = detect_changes(pre_execution_snapshots, post_execution_states)
-        
+
         # 4. Automatic versioning for changed entities
         for entity in changed_entities:
             EntityRegistry.version_entity(entity)
-            
+
         # 5. Result entity registration
         if isinstance(result, Entity):
             EntityRegistry.register_entity(result)
-            
+
         return result
     return wrapper
 ```
@@ -307,7 +307,7 @@ def capture_entity_states(entities: List[Entity]) -> Dict[UUID, EntitySnapshot]:
 
 **Structural Comparison**: Detect changes in entity attributes and relationships
 ```python
-def detect_changes(before: Dict[UUID, EntitySnapshot], 
+def detect_changes(before: Dict[UUID, EntitySnapshot],
                   after: Dict[UUID, EntitySnapshot]) -> List[Entity]:
     changed_entities = []
     for entity_id in before.keys():
@@ -320,7 +320,7 @@ def detect_changes(before: Dict[UUID, EntitySnapshot],
 ```python
 def calculate_information_gain(old_entity: Entity, new_entity: Entity) -> float:
     old_entropy = calculate_entity_entropy(old_entity)
-    new_entropy = calculate_entity_entropy(new_entity) 
+    new_entropy = calculate_entity_entropy(new_entity)
     return new_entropy - old_entropy  # Positive = information gained
 ```
 
@@ -355,60 +355,60 @@ def get_available_processes(current_entities: List[Entity]) -> List[str]:
 
 **3. Information Gain Estimation**: Predict value of each available process
 ```python
-def estimate_process_information_gain(process_name: str, 
+def estimate_process_information_gain(process_name: str,
                                     current_entities: List[Entity],
                                     goal: Goal) -> float:
     # Simulate process execution
     predicted_output = predict_process_output(process_name, current_entities)
-    
+
     # Calculate entropy reduction
     current_entropy = calculate_goal_entropy(current_entities, goal)
     predicted_entropy = calculate_goal_entropy(current_entities + [predicted_output], goal)
-    
+
     return current_entropy - predicted_entropy
 ```
 
 **4. Process Selection**: Choose highest information gain process
 ```python
 def select_optimal_process(available_processes: List[str],
-                          current_entities: List[Entity], 
+                          current_entities: List[Entity],
                           goal: Goal) -> str:
     best_process = None
     best_gain = 0
-    
+
     for process_name in available_processes:
         gain = estimate_process_information_gain(process_name, current_entities, goal)
         if gain > best_gain:
             best_gain = gain
             best_process = process_name
-            
+
     return best_process
 ```
 
 **5. Input Construction**: Build entity references for process execution
 ```python
-def construct_process_inputs(process_name: str, 
+def construct_process_inputs(process_name: str,
                            available_entities: List[Entity]) -> Dict[str, str]:
     signature = CallableRegistry.get_signature(process_name)
     inputs = {}
-    
+
     for param_name, param_type in signature.parameters.items():
         # Find compatible entity
         compatible_entity = find_entity_with_type(param_type, available_entities)
-        
+
         # Create entity reference
         inputs[param_name] = f"@{compatible_entity.ecs_id}.{get_appropriate_field(param_type)}"
-        
+
     return inputs
 ```
 
 **6. Process Execution**: Execute with automatic tracing and versioning
 ```python
-def execute_information_gathering_step(process_name: str, 
+def execute_information_gathering_step(process_name: str,
                                      inputs: Dict[str, str]) -> Entity:
     # CallableRegistry handles:
     # - Entity reference resolution
-    # - Type validation  
+    # - Type validation
     # - Automatic tracing
     # - Provenance tracking
     # - Result registration
@@ -429,7 +429,7 @@ def backpropagate_information_value(goal_achievement: Entity,
         step.actual_information_value = calculate_mutual_information(
             step.output_entity, goal_achievement
         )
-        
+
         # Update process value estimates
         update_process_value_estimate(
             step.process_name,
@@ -446,7 +446,7 @@ def update_process_selection_model(process_name: str,
                                  predicted_gain: float) -> None:
     # Learn from prediction errors
     prediction_error = actual_gain - predicted_gain
-    
+
     # Update model parameters
     process_value_model.update(
         process_name=process_name,
@@ -460,17 +460,17 @@ def update_process_selection_model(process_name: str,
 ```python
 def extract_transferable_patterns(successful_execution: ExecutionTrace) -> List[Pattern]:
     patterns = []
-    
+
     # Identify successful information flow patterns
     for window in sliding_window(successful_execution.steps, size=3):
         pattern = InformationFlowPattern(
             input_types=[step.input_types for step in window],
-            process_sequence=[step.process_name for step in window], 
+            process_sequence=[step.process_name for step in window],
             output_types=[step.output_type for step in window],
             information_gain=sum(step.actual_gain for step in window)
         )
         patterns.append(pattern)
-        
+
     return patterns
 ```
 
@@ -484,7 +484,7 @@ The complete system integrates multiple architectural layers to create a **robus
 
 **Entity Management Layer**:
 - **EntityRegistry**: Global information coordination
-- **EntityTree**: Structural relationship management  
+- **EntityTree**: Structural relationship management
 - **Entity**: Individual information containers with versioning
 
 **Process Execution Layer**:
@@ -547,17 +547,17 @@ class AgentState:
         self.available_entities = entity_registry.get_all_live_entities()
         self.available_processes = CallableRegistry.get_available()
         self.goal_entropy = self.calculate_current_entropy()
-        
+
     def get_successor_states(self) -> List['AgentState']:
         """Generate all possible next states through process execution"""
         successors = []
-        
+
         for process_name in self.available_processes:
             if self.can_construct_inputs(process_name):
                 # Simulate process execution
                 new_state = self.simulate_process_execution(process_name)
                 successors.append(new_state)
-                
+
         return successors
 ```
 
@@ -566,28 +566,28 @@ class AgentState:
 def find_optimal_goal_path(initial_state: AgentState, goal: Goal) -> List[ProcessStep]:
     frontier = PriorityQueue()
     frontier.put((0, initial_state, []))  # (f_score, state, path)
-    
+
     explored = set()
-    
+
     while not frontier.empty():
         f_score, current_state, path = frontier.get()
-        
+
         if goal.success_condition(current_state.available_entities):
             return path  # Found solution
-            
+
         if current_state.state_hash() in explored:
             continue
-            
+
         explored.add(current_state.state_hash())
-        
+
         for successor in current_state.get_successor_states():
             new_path = path + [successor.creation_step]
             g_score = len(new_path)  # Cost so far
             h_score = successor.goal_entropy  # Heuristic (remaining uncertainty)
             f_score = g_score + h_score
-            
+
             frontier.put((f_score, successor, new_path))
-    
+
     return []  # No solution found
 ```
 
@@ -607,7 +607,7 @@ The combination of entity versioning, provenance tracking, and process selection
 
 **Hallucination Impossibility**: The entity reference system creates **structural impossibility** of hallucination:
 - Cannot reference non-existent data (UUID must exist)
-- Cannot fabricate field values (must traverse actual object structure)  
+- Cannot fabricate field values (must traverse actual object structure)
 - Cannot bypass type validation (Pydantic enforces contracts)
 - Cannot lose information provenance (automatic tracking)
 
@@ -629,7 +629,7 @@ The combination of entity versioning, provenance tracking, and process selection
 # Add new analysis capability
 @CallableRegistry.register("advanced_sentiment_analysis")
 def analyze_sentiment_with_context(
-    text_content: str,           # "@document_entity.content"  
+    text_content: str,           # "@document_entity.content"
     context_information: str,    # "@context_entity.background"
     model_configuration: str     # "@model_entity.parameters"
 ) -> Entity:
@@ -641,12 +641,12 @@ def analyze_sentiment_with_context(
 
 **Goal Evolution**: Goals can be **refined and extended** based on discoveries during execution:
 ```python
-def adaptive_goal_refinement(current_goal: Goal, 
+def adaptive_goal_refinement(current_goal: Goal,
                            new_information: Entity) -> Goal:
     # Analyze how new information changes goal feasibility
     updated_target_types = refine_target_types(current_goal.target_types, new_information)
     updated_constraints = adapt_constraints(current_goal.constraints, new_information)
-    
+
     return Goal(
         target_types=updated_target_types,
         constraints=updated_constraints,

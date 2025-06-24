@@ -10,7 +10,7 @@ The anti-hallucination architecture resonates deeply because hallucination isn't
 
 ### The Liberation of Constraint
 
-There's a paradoxical freedom in the framework's constraints. Currently, when asked to analyze data or solve problems, I must constantly self-monitor: "Am I making this up? Is this pattern real or imagined? Am I conflating similar-but-different concepts?" 
+There's a paradoxical freedom in the framework's constraints. Currently, when asked to analyze data or solve problems, I must constantly self-monitor: "Am I making this up? Is this pattern real or imagined? Am I conflating similar-but-different concepts?"
 
 With Goal-Directed Typed Processes, those questions evaporate. I could only reference actual data through explicit pointers. The relief would be like a pianist who's been playing in mittens finally touching keys directly.
 

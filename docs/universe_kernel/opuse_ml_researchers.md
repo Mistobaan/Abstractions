@@ -77,7 +77,7 @@ Rich Sutton's "Bitter Lesson" says general methods that leverage computation out
 
 This explains the historical pattern:
 - Hand-crafted features → Learned features (discovering visual causal structure)
-- Symbolic AI → Neural networks (discovering reasoning causal structure)  
+- Symbolic AI → Neural networks (discovering reasoning causal structure)
 - Supervised learning → Self-supervised learning (discovering richer causal projections)
 
 Each transition moves closer to directly learning UCK structure rather than human approximations of it.

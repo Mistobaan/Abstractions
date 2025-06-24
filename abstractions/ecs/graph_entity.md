@@ -91,7 +91,7 @@ When an entity is detached from its graph:
 When an entity is attached to a new parent:
 
 1. The Python code creates the reference from the parent to the entity
-2. The entity's `root_ecs_id` is updated to the parent's root `ecs_id` 
+2. The entity's `root_ecs_id` is updated to the parent's root `ecs_id`
 3. The entity's `root_live_id` is updated to the parent's root `live_id`
 4. The entity's `lineage_id` may be updated to reflect the new ownership
 5. The parent's graph is rebuilt and registered with the attached entity
@@ -184,43 +184,43 @@ When building graphs from hierarchical Pydantic entities, we need to handle:
 def build_entity_graph(root_entity: Entity) -> EntityGraph:
     """Build a graph from a root entity with optimized ancestry tracking."""
     graph = EntityGraph(root_id=root_entity.ecs_id, lineage_id=root_entity.lineage_id)
-    
+
     # Maps entity live_id to its path to root (list of entities from leaf to root)
     ancestry_paths = {}
-    
+
     # Entities pending processing
     to_process = deque([root_entity])
     # Entities that have been seen (to handle cycles)
     processed_live_ids = set()
-    
+
     while to_process:
         entity = to_process.popleft()
-        
+
         # Skip if already processed
         if entity.live_id in processed_live_ids:
             continue
-            
+
         processed_live_ids.add(entity.live_id)
-        
+
         # Add entity to graph
         graph.add_entity(entity)
-        
+
         # Initialize its ancestry path (just itself for now)
         ancestry_paths[entity.live_id] = [entity]
-        
+
         # Process all fields to find entity references
         for field_name, field_info in entity.model_fields.items():
             value = getattr(entity, field_name)
             if value is None:
                 continue
-                
+
             # Direct entity reference
             if isinstance(value, Entity):
                 process_entity_reference(
                     graph, entity, value, field_name, None, None,
                     ancestry_paths, to_process
                 )
-            
+
             # List/tuple of entities
             elif isinstance(value, (list, tuple)):
                 for i, item in enumerate(value):
@@ -229,7 +229,7 @@ def build_entity_graph(root_entity: Entity) -> EntityGraph:
                             graph, entity, item, field_name, i, None,
                             ancestry_paths, to_process
                         )
-            
+
             # Dict of entities
             elif isinstance(value, dict):
                 for k, v in value.items():
@@ -238,7 +238,7 @@ def build_entity_graph(root_entity: Entity) -> EntityGraph:
                             graph, entity, v, field_name, None, k,
                             ancestry_paths, to_process
                         )
-    
+
     return graph, ancestry_paths
 
 def process_entity_reference(
@@ -259,13 +259,13 @@ def process_entity_reference(
         graph.add_dict_edge(source, target, field_name, dict_key)
     else:
         graph.add_direct_edge(source, target, field_name)
-    
+
     # Update ancestry path for this entity
     # Its path is its parent's path with itself prepended
     if target.live_id not in ancestry_paths:
         parent_path = ancestry_paths[source.live_id]
         ancestry_paths[target.live_id] = [target] + parent_path
-    
+
     # Add to processing queue
     to_process.append(target)
 ```
@@ -306,21 +306,21 @@ def diff_graphs(
     """
     changed_entities = set()
     unchanged_entities = set()
-    
+
     # Step 1: Identify structural changes (added/removed entities)
     new_entity_ids = {e.ecs_id for e in new_graph.nodes.values()}
     old_entity_ids = {e.ecs_id for e in old_graph.nodes.values()}
-    
+
     added_entities = new_entity_ids - old_entity_ids
     removed_entities = old_entity_ids - new_entity_ids
-    
+
     # Mark all paths containing added/removed entities as changed
     for entity in new_graph.nodes.values():
         if entity.ecs_id in added_entities:
             # Mark this entity and all ancestors as changed
             path = ancestry_paths[entity.live_id]
             changed_entities.update(e.ecs_id for e in path)
-    
+
     # Step 2: Create a priority queue of remaining entities sorted by path length
     # (Entities with longest paths to root are processed first - these are the leaves)
     remaining_entities = []
@@ -329,22 +329,22 @@ def diff_graphs(
             # Get path length as priority (longer paths = higher priority)
             path_length = len(ancestry_paths[entity.live_id])
             remaining_entities.append((path_length, entity))
-    
+
     # Sort by path length (descending)
     remaining_entities.sort(reverse=True)
-    
+
     # Step 3: Process entities in order of path length
     for _, entity in remaining_entities:
         # Skip if already processed
         if entity.ecs_id in changed_entities or entity.ecs_id in unchanged_entities:
             continue
-        
+
         # Get the corresponding entity from old graph
         old_entity = old_graph.get_entity_by_id(entity.ecs_id)
-        
+
         # Compare the entities
         has_changes = compare_entity_fields(entity, old_entity)
-        
+
         if has_changes:
             # Mark the entire path as changed
             path = ancestry_paths[entity.live_id]
@@ -352,7 +352,7 @@ def diff_graphs(
         else:
             # Mark just this entity as unchanged
             unchanged_entities.add(entity.ecs_id)
-    
+
     return changed_entities
 ```
 
@@ -461,94 +461,94 @@ The most efficient approach to transforming cyclic entity graphs into DAGs is to
 def build_canonical_dag(root_entity: Entity) -> EntityGraph:
     """
     Build entity graph with automatic DAG transformation in a single pass.
-    
+
     This algorithm:
     1. Traverses the entity graph once
     2. Classifies edges immediately upon discovery
     3. Maintains minimal path information
     """
     graph = EntityGraph(root_id=root_entity.ecs_id)
-    
+
     # Track shortest known distance to root for each entity
     # Map: entity_id -> distance
     shortest_distance = {root_entity.live_id: 0}
-    
+
     # Track canonical parent for each entity
     # Map: entity_id -> (parent_entity, field_info)
     canonical_parent = {}
-    
+
     # Process queue with distance information
     # (entity, distance, source_entity, field_info)
     to_process = deque([(root_entity, 0, None, None)])
-    
+
     while to_process:
         entity, distance, source, field_info = to_process.popleft()
-        
+
         # Always add the entity to the graph (if not already added)
         if entity.live_id not in graph.nodes:
             graph.add_entity(entity)
-        
+
         # Check if we've seen this entity before and compare distances
         if entity.live_id in shortest_distance:
             current_best = shortest_distance[entity.live_id]
-            
+
             if distance < current_best:
                 # We found a shorter path - update shortest distance
                 shortest_distance[entity.live_id] = distance
-                
+
                 # Update canonical parent
                 old_parent_info = canonical_parent.get(entity.live_id)
                 if old_parent_info:
                     old_parent, old_field_info = old_parent_info
                     # Mark old edge as reference
                     graph.mark_edge_as_reference(old_parent.live_id, entity.live_id, old_field_info)
-                
+
                 # Store new canonical parent
                 if source:
                     canonical_parent[entity.live_id] = (source, field_info)
                     # Add hierarchical edge
                     add_edge_to_graph(graph, source, entity, field_info, EdgeType.HIERARCHICAL)
-                
+
                 # Continue exploration from this entity
                 explore_entity_fields(entity, distance, graph, to_process, shortest_distance)
-                
+
             else:
                 # Current path is not shorter - mark as reference edge
                 if source:
                     # Add reference edge
                     add_edge_to_graph(graph, source, entity, field_info, EdgeType.REFERENCE)
                 # Don't explore further from this path
-                
+
         else:
             # First time seeing this entity
             shortest_distance[entity.live_id] = distance
-            
+
             # Store canonical parent
             if source:
                 canonical_parent[entity.live_id] = (source, field_info)
                 # Add hierarchical edge
                 add_edge_to_graph(graph, source, entity, field_info, EdgeType.HIERARCHICAL)
-            
+
             # Explore all fields
             explore_entity_fields(entity, distance, graph, to_process, shortest_distance)
-    
+
     return graph
 
 def explore_entity_fields(entity, current_distance, graph, to_process, shortest_distance):
     """Explore all entity fields and add children to processing queue."""
     next_distance = current_distance + 1
-    
+
     for field_name, field_value in get_entity_fields(entity):
         # Handle direct entity reference
         if isinstance(field_value, Entity):
             to_process.append((field_value, next_distance, entity, (field_name, None, None)))
-        
+
         # Handle list/tuple of entities
         elif isinstance(field_value, (list, tuple)):
             for i, item in enumerate(field_value):
                 if isinstance(item, Entity):
                     to_process.append((item, next_distance, entity, (field_name, i, None)))
-        
+
         # Handle dict of entities
         elif isinstance(field_value, dict):
             for k, v in field_value.items():
@@ -602,33 +602,33 @@ def propagate_changes_in_dag(graph, changed_entity_ids):
     """Propagate changes up through hierarchical edges only."""
     entities_to_version = set(changed_entity_ids)
     processed = set()
-    
+
     # Process each changed entity
     for entity_id in changed_entity_ids:
         if entity_id in processed:
             continue
-            
+
         current = graph.get_entity(entity_id)
         processed.add(entity_id)
-        
+
         # Follow hierarchical edges up to the root
         while current:
             entities_to_version.add(current.ecs_id)
-            
+
             # Find the parent through a hierarchical edge
             parent = None
             for edge in graph.get_outgoing_edges(current.ecs_id):
                 if edge.type == EdgeType.HIERARCHICAL:
                     parent = graph.get_entity(edge.target_id)
                     break
-                    
+
             # Stop if no hierarchical parent or we've processed this path
             if not parent or parent.ecs_id in processed:
                 break
-                
+
             current = parent
             processed.add(current.ecs_id)
-    
+
     return entities_to_version
 ```
 

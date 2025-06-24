@@ -11,7 +11,7 @@ This document presents the evolution from explicit component-based sprite modeli
 Our initial approach treated sprites as explicit compositions of semantic components - heads, torsos, weapons, equipment - each with well-defined properties and spatial relationships. This explicit modeling provided several advantages:
 
 - **Interpretability**: Each component had clear semantic meaning
-- **Modularity**: Components could be swapped and recombined systematically  
+- **Modularity**: Components could be swapped and recombined systematically
 - **Controllability**: Direct manipulation of specific sprite elements
 - **Geometric Consistency**: 8-directional views maintained identical component sets
 
@@ -87,7 +87,7 @@ The spatial vocabulary can be pre-computed and frozen, eliminating the need to l
 The color component operates in continuous space, learning to map RGB values to semantic embeddings that capture material properties, artistic style, and contextual meaning. This continuous representation allows for:
 
 - **Gradient Representation**: Smooth color transitions within patches
-- **Semantic Grouping**: Similar materials cluster in embedding space  
+- **Semantic Grouping**: Similar materials cluster in embedding space
 - **Style Transfer**: Color embeddings can be manipulated to change artistic style
 - **Interpolation**: Smooth transitions between different semantic interpretations
 
@@ -134,7 +134,7 @@ The sequence construction preserves local spatial relationships - adjacent token
 The transformer generates sprites token by token, conditioning each new patch on all previously generated patches. This autoregressive approach enables:
 
 - **Global Coherence**: Later patches can reference and build upon earlier patches
-- **Progressive Refinement**: Complex visual structures emerge through incremental construction  
+- **Progressive Refinement**: Complex visual structures emerge through incremental construction
 - **Controllable Generation**: Generation can be stopped, modified, or redirected at any point
 - **Conditional Generation**: External conditions can influence the generation process
 

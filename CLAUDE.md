@@ -118,7 +118,7 @@ python -m unittest tests/test_entity.py
 
 ## Next Development Steps
 1. **✅ Improved Field Type Detection**: Successfully enhanced to handle container fields and empty containers
-2. **✅ Container Entity Processing**: Updated to work with the improved type detection 
+2. **✅ Container Entity Processing**: Updated to work with the improved type detection
 3. **✅ Basic Graph Construction Testing**: Added tests for simple entity hierarchies and container relationships
 4. **✅ Refined Edge Classification**: Implemented ownership-based edge classification using Pydantic field metadata
 5. **✅ Graph Visualization**: Added Mermaid diagram generation for entity graphs
@@ -159,7 +159,7 @@ Future work:
 
 ## Graph Construction Algorithm
 The implementation uses a simplified single-pass approach:
-1. **Unified Graph Building**: 
+1. **Unified Graph Building**:
    - Builds graph structure and ancestry paths in a single traversal
    - Marks all edges as hierarchical during initial discovery
    - Maintains ancestry paths during traversal

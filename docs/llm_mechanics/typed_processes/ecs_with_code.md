@@ -9,7 +9,7 @@ The Goal-Directed Typed Processes framework provides the theoretical foundation 
 **Core Insight**: Instead of building abstract categorical structures, we implement the information-theoretic principles through **practical software engineering patterns** that naturally enforce the constraints we need:
 
 - **Entity Component System** → Memory Stack with perfect provenance
-- **Callable Registry** → Process execution with automatic tracing  
+- **Callable Registry** → Process execution with automatic tracing
 - **Entity References** → Pointer-only composition with type safety
 - **Automatic Versioning** → Information gain measurement and monotonic growth
 
@@ -37,7 +37,7 @@ class Entity(BaseModel):
     from_storage: bool = Field(default=False, description="Whether the entity was loaded from storage")
     untyped_data: str = Field(default="", description="Default data container for untyped data")
     attribute_source: Dict[str, Union[Optional[UUID], List[Optional[UUID]], List[None], Dict[str, Optional[UUID]]]] = Field(
-        default_factory=dict, 
+        default_factory=dict,
         description="Tracks the source entity for each attribute"
     )
 ```
@@ -52,18 +52,18 @@ def validate_attribute_source(self) -> Self:
     # Initialize the attribute_source if not present
     if self.attribute_source is None:
         raise ValueError("attribute_source is None factory did not work")
-    
+
     # Get all valid field names for this model
     valid_fields = set(self.model_fields.keys())
     valid_fields.discard('attribute_source')  # Prevent recursion
-    
+
     # Initialize missing fields with appropriate structure based on field type
     for field_name in valid_fields:
         field_value = getattr(self, field_name)
-        
+
         if field_name in self.attribute_source:
             continue
-            
+
         # Handle different field types
         if isinstance(field_value, list):
             none_value: Optional[UUID] = None
@@ -134,25 +134,25 @@ class EntityTree(BaseModel):
     # Basic tree info
     root_ecs_id: UUID
     lineage_id: UUID
-    
+
     # Node storage - maps entity.ecs_id to the entity object
     nodes: Dict[UUID, "Entity"] = Field(default_factory=dict)
-    
+
     # Edge storage - maps (source_id, target_id) to edge details
     edges: Dict[Tuple[UUID, UUID], EntityEdge] = Field(default_factory=dict)
-    
+
     # Outgoing edges by source - maps entity.ecs_id to list of target IDs
     outgoing_edges: Dict[UUID, List[UUID]] = Field(default_factory=lambda: defaultdict(list))
-    
+
     # Incoming edges by target - maps entity.ecs_id to list of source IDs
     incoming_edges: Dict[UUID, List[UUID]] = Field(default_factory=lambda: defaultdict(list))
-    
+
     # Ancestry paths - maps entity.ecs_id to list of IDs from entity to root
     ancestry_paths: Dict[UUID, List[UUID]] = Field(default_factory=dict)
-    
+
     # Map of live_id to ecs_id for easy lookup
     live_id_to_ecs_id: Dict[UUID, UUID] = Field(default_factory=dict)
-    
+
     # Metadata for debugging and tracking
     node_count: int = 0
     edge_count: int = 0
@@ -193,77 +193,77 @@ def build_entity_tree(root_entity: "Entity") -> EntityTree:
         root_ecs_id=root_entity.ecs_id,
         lineage_id=root_entity.lineage_id
     )
-    
+
     # Maps entity ecs_id to its ancestry path
     ancestry_paths = {root_entity.ecs_id: [root_entity.ecs_id]}
-    
+
     # Queue for breadth-first traversal with path information
     to_process: deque[tuple[Entity, Optional[UUID]]] = deque([(root_entity, None)])
     processed = set()
-    
+
     # Add root entity to tree
     tree.add_entity(root_entity)
     tree.set_ancestry_path(root_entity.ecs_id, [root_entity.ecs_id])
-    
+
     # Process all entities
     while to_process:
         entity, parent_id = to_process.popleft()
-        
+
         # Circular reference detection
         if entity.ecs_id in processed and parent_id is not None:
             raise ValueError(f"Circular entity reference detected: {entity.ecs_id}")
-        
+
         entity_needs_processing = entity.ecs_id not in processed
         processed.add(entity.ecs_id)
-        
+
         # Process hierarchical relationships and ancestry
         if parent_id is not None:
             edge_key = (parent_id, entity.ecs_id)
             if edge_key in tree.edges:
                 tree.mark_edge_as_hierarchical(parent_id, entity.ecs_id)
-                
+
                 # Update ancestry path with shortest path logic
                 if parent_id in ancestry_paths:
                     parent_path = ancestry_paths[parent_id]
                     entity_path = parent_path + [entity.ecs_id]
-                    
+
                     if entity.ecs_id not in ancestry_paths or len(entity_path) < len(ancestry_paths[entity.ecs_id]):
                         ancestry_paths[entity.ecs_id] = entity_path
                         tree.set_ancestry_path(entity.ecs_id, entity_path)
-        
+
         # Process entity fields for references
         if entity_needs_processing:
             for field_name in entity.model_fields:
                 value = getattr(entity, field_name)
-                
+
                 if value is None:
                     continue
-                
+
                 field_type = get_pydantic_field_type_entities(entity, field_name)
-                
+
                 # Handle different container types
                 if isinstance(value, Entity):
                     if value.ecs_id not in tree.nodes:
                         tree.add_entity(value)
-                    
+
                     process_entity_reference(
                         tree=tree, source=entity, target=value, field_name=field_name
                     )
                     to_process.append((value, entity.ecs_id))
-                
+
                 elif isinstance(value, list) and field_type:
                     for i, item in enumerate(value):
                         if isinstance(item, Entity):
                             if item.ecs_id not in tree.nodes:
                                 tree.add_entity(item)
                             process_entity_reference(
-                                tree=tree, source=entity, target=item, 
+                                tree=tree, source=entity, target=item,
                                 field_name=field_name, list_index=i
                             )
                             to_process.append((item, entity.ecs_id))
-                
+
                 # Similar handling for dict, tuple, set...
-    
+
     return tree
 ```
 
@@ -272,21 +272,21 @@ def build_entity_tree(root_entity: "Entity") -> EntityTree:
 ```python
 def get_pydantic_field_type_entities(entity: "Entity", field_name: str, detect_non_entities: bool = False) -> Union[Optional[Type], bool]:
     """Get the entity type from a Pydantic field, handling container types properly."""
-    
+
     # Skip identity fields that should be ignored
-    if field_name in ('ecs_id', 'live_id', 'created_at', 'forked_at', 'previous_ecs_id', 
-                      'old_ids', 'old_ecs_id', 'from_storage', 'attribute_source', 'root_ecs_id', 
+    if field_name in ('ecs_id', 'live_id', 'created_at', 'forked_at', 'previous_ecs_id',
+                      'old_ids', 'old_ecs_id', 'from_storage', 'attribute_source', 'root_ecs_id',
                       'root_live_id', 'lineage_id'):
         return None
-    
+
     field_info = entity.model_fields[field_name]
     annotation = field_info.annotation
     field_value = getattr(entity, field_name)
-    
+
     # Direct entity instance detection
     if isinstance(field_value, Entity):
         return None if detect_non_entities else type(field_value)
-    
+
     # Container analysis for populated containers
     if field_value is not None:
         if isinstance(field_value, list) and field_value:
@@ -296,7 +296,7 @@ def get_pydantic_field_type_entities(entity: "Entity", field_name: str, detect_n
                         if isinstance(item, Entity):
                             return type(item)
         # Similar logic for dict, tuple, set...
-    
+
     # Advanced type hint analysis for empty containers...
     return None
 ```
@@ -322,7 +322,7 @@ def version_entity(cls, entity: "Entity", force_versioning: bool = False) -> boo
     """Core function to version an entity with intelligent change detection"""
     if not entity.root_ecs_id:
         raise ValueError("entity has no root_ecs_id for versioning")
-    
+
     old_tree = cls.get_stored_tree(entity.root_ecs_id)
     if old_tree is None:
         cls.register_entity(entity)
@@ -333,9 +333,9 @@ def version_entity(cls, entity: "Entity", force_versioning: bool = False) -> boo
             modified_entities = new_tree.nodes.keys()
         else:
             modified_entities = list(find_modified_entities(new_tree=new_tree, old_tree=old_tree))
-    
+
         typed_entities = [entity for entity in modified_entities if isinstance(entity, UUID)]
-        
+
         if len(typed_entities) > 0:
             # Complex versioning logic that updates ecs_ids for changed entities
             # while maintaining lineage relationships...
@@ -343,13 +343,13 @@ def version_entity(cls, entity: "Entity", force_versioning: bool = False) -> boo
             root_entity = new_tree.get_entity(current_root_ecs_id)
             root_entity.update_ecs_ids()
             new_root_ecs_id = root_entity.ecs_id
-            
+
             # Update tree structure and register new version
             new_tree.nodes.pop(current_root_ecs_id)
             new_tree.nodes[new_root_ecs_id] = root_entity
             new_tree.root_ecs_id = new_root_ecs_id
             new_tree.lineage_id = root_entity.lineage_id
-            
+
             cls.register_entity_tree(new_tree)
         return True
 ```
@@ -359,55 +359,55 @@ def version_entity(cls, entity: "Entity", force_versioning: bool = False) -> boo
 ```python
 def find_modified_entities(new_tree: EntityTree, old_tree: EntityTree, greedy: bool = True, debug: bool = False) -> Union[Set[UUID], Tuple[Set[UUID], Dict[str, Any]]]:
     """Find entities that have been modified between two trees using set-based approach"""
-    
+
     modified_entities = set()
-    
+
     # Step 1: Compare node sets to identify added/removed entities
     new_entity_ids = set(new_tree.nodes.keys())
     old_entity_ids = set(old_tree.nodes.keys())
-    
+
     added_entities = new_entity_ids - old_entity_ids
     common_entities = new_entity_ids & old_entity_ids
-    
+
     # Mark all added entities and their ancestry paths for versioning
     for entity_id in added_entities:
         path = new_tree.get_ancestry_path(entity_id)
         modified_entities.update(path)
-    
+
     # Step 2: Compare edge sets to identify moved entities
     new_edges = set((source_id, target_id) for (source_id, target_id) in new_tree.edges.keys())
     old_edges = set((source_id, target_id) for (source_id, target_id) in old_tree.edges.keys())
-    
+
     added_edges = new_edges - old_edges
-    
+
     # Identify moved entities with different parents
     for source_id, target_id in added_edges:
         if target_id in common_entities:
             # Check if entity has different parents
             old_parents = {s for s, t in old_edges if t == target_id}
             new_parents = {s for s, t in new_edges if t == target_id}
-            
+
             if old_parents != new_parents:
                 path = new_tree.get_ancestry_path(target_id)
                 modified_entities.update(path)
-    
+
     # Step 3: Check attribute changes for remaining entities
-    remaining_entities = [(len(new_tree.get_ancestry_path(entity_id)), entity_id) 
-                         for entity_id in common_entities 
+    remaining_entities = [(len(new_tree.get_ancestry_path(entity_id)), entity_id)
+                         for entity_id in common_entities
                          if entity_id not in modified_entities]
-    
+
     remaining_entities.sort(reverse=True)  # Process leaf nodes first
-    
+
     for _, entity_id in remaining_entities:
         new_entity = new_tree.get_entity(entity_id)
         old_entity = old_tree.get_entity(entity_id)
-        
+
         if new_entity and old_entity:
             has_changes = compare_non_entity_attributes(new_entity, old_entity)
             if has_changes:
                 path = new_tree.get_ancestry_path(entity_id)
                 modified_entities.update(path)
-    
+
     return modified_entities
 ```
 
@@ -469,7 +469,7 @@ execute_callable("analyze_customer_segments", {
 ```
 
 The system **automatically resolves** these references by:
-1. **Parsing** the `@uuid.field` syntax 
+1. **Parsing** the `@uuid.field` syntax
 2. **Retrieving** the entity from `EntityRegistry.get_live_entity(uuid)`
 3. **Navigating** the field path using the sophisticated type detection system
 4. **Validating** type compatibility with the callable's parameter requirements
@@ -530,7 +530,7 @@ entity_tree = build_entity_tree(hierarchical_entity)
 
 This **architectural integration** creates a system where:
 - **Information cannot be fabricated** (entity references must exist)
-- **All transformations are traceable** (automatic provenance tracking)  
+- **All transformations are traceable** (automatic provenance tracking)
 - **Goal-directed navigation is possible** (rich entity type and relationship analysis)
 - **Learning improves over time** (version analysis reveals which information sources are most valuable)
 
@@ -549,7 +549,7 @@ Using the example from the original implementation:
 @CallableRegistry.register("analyze_customer_segments")
 def segment_analysis(
     customer_data: str,           # Input type constraint
-    segmentation_method: str,     # Input type constraint  
+    segmentation_method: str,     # Input type constraint
     confidence_threshold: float   # Input type constraint
 ) -> Entity:                     # Output type guarantee
     # Process logic with automatic entity tracing
@@ -597,7 +597,7 @@ From the planned implementation:
 # Execution with entity references
 execute_callable("analyze_customer_segments", {
     "customer_data": "@f65cf3bd-9392-499f-8f57-dba701f5069c.csv_content",
-    "segmentation_method": "@a1b2c3d4-5678-90ef-1234-567890abcdef.algorithm_name", 
+    "segmentation_method": "@a1b2c3d4-5678-90ef-1234-567890abcdef.algorithm_name",
     "confidence_threshold": 0.85  # Direct values still allowed for primitives
 })
 ```
@@ -618,7 +618,7 @@ This syntax creates what we call **explicit information provenance** - every pie
 
 Consider a market analysis process that needs:
 - Historical price data from a market feed entity
-- Economic indicators from a government data entity  
+- Economic indicators from a government data entity
 - Analysis parameters from a configuration entity
 - Previous analysis results from an analysis archive entity
 
@@ -655,22 +655,22 @@ def entity_tracer(func):
         # 1. Pre-execution entity state capture
         input_entities = extract_entities_from_args(args, kwargs)
         pre_execution_snapshots = capture_entity_states(input_entities)
-        
+
         # 2. Function execution
         result = func(*args, **kwargs)
-        
+
         # 3. Post-execution change detection
         post_execution_states = capture_entity_states(input_entities)
         changed_entities = detect_changes(pre_execution_snapshots, post_execution_states)
-        
+
         # 4. Automatic versioning for changed entities
         for entity in changed_entities:
             EntityRegistry.version_entity(entity)
-            
+
         # 5. Result entity registration
         if isinstance(result, Entity):
             EntityRegistry.register_entity(result)
-            
+
         return result
     return wrapper
 ```

@@ -30,14 +30,14 @@ class InformationEvent(BaseModel):
     timestamp: datetime = Field(default_factory=datetime.now)
     event_type: EventType = Field(description="Type of information event")
     phase: EventPhase = Field(default=EventPhase.DECLARATION)
-    
+
     # Information flow tracking (from original Event class)
     modified: bool = Field(default=False)
     canceled: bool = Field(default=False)
     parent_event: Optional[UUID] = Field(default=None)
     lineage_children_events: List[UUID] = Field(default_factory=list)
     children_events: List[UUID] = Field(default_factory=list)
-    
+
     # Entity coordination metadata (new for ECS integration)
     affected_entities: List[UUID] = Field(default_factory=list)
     information_gain: float = Field(default=0.0)
@@ -74,22 +74,22 @@ class InformationTrigger(BaseModel):
     event_phase: EventPhase = Field(description="Process phase")
     required_entity_types: Set[str] = Field(default_factory=set)
     novel_output_types: Set[str] = Field(default_factory=set)
-    
+
     def __call__(self, event: InformationEvent, current_stack: List[Entity]) -> bool:
         """Evaluate trigger conditions"""
         # Basic event pattern matching (from original)
         if not (event.event_type == self.event_type and event.phase == self.event_phase):
             return False
-        
+
         # Type compatibility check
         available_types = {entity.__class__.__name__ for entity in current_stack}
         if self.required_entity_types and not self.required_entity_types.issubset(available_types):
             return False
-        
-        # Information gain check  
+
+        # Information gain check
         if self.novel_output_types and self.novel_output_types.issubset(available_types):
             return False
-        
+
         return True
 ```
 
@@ -112,11 +112,11 @@ class InformationOrchestrator:
     _events_by_type: Dict[EventType, List[InformationEvent]] = defaultdict(list)
     _events_by_timestamp: Dict[datetime, List[InformationEvent]] = defaultdict(list)
     _all_events: List[InformationEvent] = []
-    
+
     # Process coordination (adapted from event handlers)
     _process_handlers: Dict[UUID, ProcessHandler] = {}
     _handlers_by_trigger: Dict[Trigger, List[ProcessHandler]] = defaultdict(list)
-    
+
     # Information stack management (new for ECS integration)
     _current_information_stack: List[Entity] = []
 ```
@@ -129,25 +129,25 @@ def register(cls, event: InformationEvent) -> InformationEvent:
     """Register event and trigger reactive processes (adapted from original)"""
     # Store in all appropriate indices (original logic preserved)
     cls._store_event(event)
-    
+
     # Check for process handlers (original handler mechanism)
     handlers = cls._get_handlers_for_event(event)
-    
+
     if not handlers or event.phase == EventPhase.COMPLETION:
         return event
-    
+
     # Process through handlers (original execution logic)
     current_event = event
     for handler in handlers:
         result = handler(current_event)
-        
+
         if result and result.canceled:
             cls._store_event(result)
             return result
         elif result and result.modified:
             current_event = result
             cls._store_event(current_event)
-    
+
     return current_event
 ```
 
@@ -167,7 +167,7 @@ class EntityRegistry:
     lineage_registry: Dict[UUID, List[UUID]] = Field(default_factory=dict)
     live_id_registry: Dict[UUID, Entity] = Field(default_factory=dict)
     type_registry: Dict[Type[Entity], List[UUID]] = Field(default_factory=dict)
-    
+
     @classmethod
     def register_entity(cls, entity: Entity) -> None:
         """Original registration with event broadcasting"""
@@ -175,10 +175,10 @@ class EntityRegistry:
             raise ValueError("can only register root entities with a root_ecs_id for now")
         elif not entity.is_root_entity():
             raise ValueError("can only register root entities for now")
-        
+
         entity_tree = build_entity_tree(entity)
         cls.register_entity_tree(entity_tree)
-        
+
         # Broadcast entity creation event
         creation_event = InformationEvent(
             event_type=EventType.ENTITY_CREATION,
@@ -196,18 +196,18 @@ class ProcessHandler(BaseModel):
     name: str = Field(default="ProcessHandler")
     trigger_conditions: List[InformationTrigger] = Field(default_factory=list)
     callable_name: str = Field(description="Associated callable process")
-    
+
     def __call__(self, event: InformationEvent) -> Optional[InformationEvent]:
         """Execute process if conditions met (original handler interface)"""
-        if any(trigger(event, InformationOrchestrator._current_information_stack) 
+        if any(trigger(event, InformationOrchestrator._current_information_stack)
                for trigger in self.trigger_conditions):
-            
+
             # Construct entity references from current stack
             inputs = self._construct_entity_references()
-            
+
             # Execute through CallableRegistry
             result_entity = CallableRegistry.execute_callable(self.callable_name, inputs)
-            
+
             # Return process execution event
             return InformationEvent(
                 event_type=EventType.PROCESS_EXECUTION,
@@ -227,7 +227,7 @@ class ProcessHandler(BaseModel):
 **Stack-Driven Execution Model**: The entire system operates as a **reactive data flow architecture**:
 
 1. **Information Stack Updates** trigger stack update events
-2. **Stack Update Events** trigger compatibility checking for all registered processes  
+2. **Stack Update Events** trigger compatibility checking for all registered processes
 3. **Compatible Processes** with positive information gain automatically execute
 4. **Process Execution** produces new entities that update the stack
 5. **New Stack State** triggers the next wave of compatibility checking
@@ -239,7 +239,7 @@ class ProcessHandler(BaseModel):
 
 **Emergence Without Orchestration**: Complex goal-directed behavior emerges from the interaction of simple reactive rules:
 - Type compatibility determines **process eligibility**
-- Information gain determines **execution priority**  
+- Information gain determines **execution priority**
 - Natural termination occurs when **no novel information** can be produced
 - Goal achievement emerges as the system **flows toward target information types**
 
@@ -250,12 +250,12 @@ class ProcessHandler(BaseModel):
 **Three-Layer Reactive Architecture**: The complete system implements a **three-layer reactive architecture**:
 
 - **Entity Layer**: Immutable information storage with versioning and provenance (EntityRegistry + Entity)
-- **Process Layer**: Reactive process execution with type safety and automatic tracing (CallableRegistry + automatic entity tracing)  
+- **Process Layer**: Reactive process execution with type safety and automatic tracing (CallableRegistry + automatic entity tracing)
 - **Orchestration Layer**: Event-driven coordination with emergent goal-directed behavior (InformationOrchestrator + reactive handlers)
 
 **Information Flow Dynamics**: Information flows through the system following **natural optimization principles**:
 - **Availability** triggers **compatibility checking**
-- **Compatibility** triggers **execution eligibility**  
+- **Compatibility** triggers **execution eligibility**
 - **Information gain** determines **execution priority**
 - **Execution** produces **new availability**
 - **Cycle continues** until **goal achievement** or **natural termination**

@@ -35,24 +35,24 @@ This approach uses process forking rather than threading for complete isolation 
        """Execute a callable in a forked process with its own registry branch."""
        # Resolve any entity references in input_data
        resolved_input = resolve_entity_references(input_data)
-       
+
        # Get the function from registry
        func = CallableRegistry.get(func_name)
        return_type = get_return_type_hint(func)
-       
+
        # Fork the process
        pid = os.fork()
-       
+
        if pid == 0:
            # Child process - execute function and exit
            try:
                # Execute function with resolved inputs
                result = func(**resolved_input)
-               
+
                # Serialize result to be picked up by parent
                with open('/tmp/func_result.pickle', 'wb') as f:
                    pickle.dump(result, f)
-               
+
                os._exit(0)  # Exit child process successfully
            except Exception as e:
                # Log error and exit with non-zero code
@@ -62,20 +62,20 @@ This approach uses process forking rather than threading for complete isolation 
        else:
            # Parent process - wait for child to complete
            _, status = os.waitpid(pid, 0)
-           
+
            if status == 0:
                # Child succeeded, get result
                with open('/tmp/func_result.pickle', 'rb') as f:
                    result = pickle.load(f)
-                   
+
                # Type checking and validation
                if not type_matches(result, return_type):
                    raise TypeError(f"Function {func_name} returned {type(result)}, expected {return_type}")
-                   
+
                # If successful, merge relevant entities back to main registry
                if isinstance(result, Entity):
                    EntityRegistry.merge_entity(result)
-                   
+
                return result
            else:
                # Child failed, get error
@@ -90,11 +90,11 @@ This approach uses process forking rather than threading for complete isolation 
    def create_branch(cls) -> 'EntityRegistry':
        """Create a branch of the registry for isolated execution."""
        branch = cls()
-       
+
        # Copy the minimal necessary state
        # We don't need to copy all entities, just the ones that will be used
        # Most implementations would use copy-on-write semantics
-       
+
        return branch
    ```
 
@@ -105,13 +105,13 @@ This approach uses process forking rather than threading for complete isolation 
        # Handle Union, Optional, etc.
        if hasattr(type_hint, "__origin__") and type_hint.__origin__ is Union:
            return any(type_matches(value, arg) for arg in type_hint.__args__)
-           
+
        # Handle generic containers
        if hasattr(type_hint, "__origin__"):
            if not isinstance(value, type_hint.__origin__):
                return False
            # Check container item types...
-           
+
        # Handle direct type check
        return isinstance(value, type_hint)
    ```
@@ -149,14 +149,14 @@ def transform_student(student: Student) -> GraduateStudent:
     # 1. Create temporary entities
     # 2. Modify the student entity
     # 3. Create and manipulate other entities
-    
+
     # Create a new graduate student from the input student
     grad_student = GraduateStudent(
         name=student.name,
         age=student.age,
         undergraduate_degree=student.major
     )
-    
+
     # This will be returned and type-validated against GraduateStudent
     return grad_student
 ```
@@ -205,7 +205,7 @@ By externalizing the execution environment to Modal, we gain significant operati
 
 The transformation process follows a clean, predictable pattern:
 
-1. **Preparation**: 
+1. **Preparation**:
    - Entities are serialized to pure data
    - References are resolved before transmission
    - Type information is preserved
@@ -226,7 +226,7 @@ The transformation process follows a clean, predictable pattern:
 This model naturally supports entity type transformations, where functions convert between different entity types:
 
 - **Student → Employee**: Transform educational data into workforce data
-- **Draft → Document**: Convert a working draft into a finalized document 
+- **Draft → Document**: Convert a working draft into a finalized document
 - **RawData → AnalyzedResult**: Process incoming data into analytical outputs
 
 These transformations are explicit and type-governed, making the system's behavior predictable and traceable.

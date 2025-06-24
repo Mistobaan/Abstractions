@@ -88,8 +88,8 @@ The selection mechanism begins by identifying the set of available processes. A 
 The formal specification of the availability function captures these constraints:
 
 ```
-Available(stack, goal) = {p ∈ AllProcesses | 
-    can_construct(p.input, stack) ∧ 
+Available(stack, goal) = {p ∈ AllProcesses |
+    can_construct(p.input, stack) ∧
     p.output.type ∉ stack.types ∧
     InfoGain(p, stack, goal) > threshold}
 ```
@@ -144,7 +144,7 @@ Traditional reinforcement learning systems often struggle with credit assignment
 The information value of a Memory Stack entry combines three components. The mutual information between the entry and goal achievement quantifies the direct statistical relationship. The causal contribution measures how much the entry enabled subsequent valuable discoveries. The temporal importance weights information based on when it became available, rewarding early discoveries that enabled efficient problem solving.
 
 ```
-InfoValue(entry_i, terminal_state) = 
+InfoValue(entry_i, terminal_state) =
   mutual_information(entry_i, goal_achievement) +
   causal_contribution(entry_i, subsequent_entries) +
   temporal_importance(entry_i, decision_sequence)

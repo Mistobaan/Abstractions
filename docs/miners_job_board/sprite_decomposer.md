@@ -6,7 +6,7 @@ This project proposes a novel approach to automatically decompose 2D character s
 
 ## 1. Problem Statement & Motivation
 
-Modern 2D game development relies heavily on modular character systems where artists combine interchangeable parts (heads, armor, weapons) to create diverse characters. However, existing sprites are often monolithic - making it impossible to mix-and-match components from different art sources. 
+Modern 2D game development relies heavily on modular character systems where artists combine interchangeable parts (heads, armor, weapons) to create diverse characters. However, existing sprites are often monolithic - making it impossible to mix-and-match components from different art sources.
 
 **Research Question**: Can we learn to reverse-engineer complete character sprites back into their modular components, enabling automatic conversion of any sprite into a modular system?
 
@@ -128,7 +128,7 @@ Since we work with 128×128 pixel art:
 **Challenge**: Some components may be hidden in certain directions
 **Solution**: Predict component presence confidence alongside component type
 
-### 8.2 Art Style Generalization  
+### 8.2 Art Style Generalization
 **Challenge**: Training data from one art style may not transfer
 **Solution**: Circular loss evaluation on diverse art styles + domain adaptation techniques
 
@@ -145,8 +145,8 @@ Since we work with 128×128 pixel art:
 
 ## 10. Timeline & Resources
 
-**Duration**: 6 months  
-**Computational Requirements**: GPU with 8GB+ VRAM for training  
+**Duration**: 6 months
+**Computational Requirements**: GPU with 8GB+ VRAM for training
 **Expected Outcome**: Working prototype + research paper submission
 
 This project combines fundamental research in disentangled representation learning with practical applications in game development, making it an ideal thesis topic that bridges theory and application.

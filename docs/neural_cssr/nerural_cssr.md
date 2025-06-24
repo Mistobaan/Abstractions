@@ -66,24 +66,24 @@ The transformer generalizes across similar patterns, providing reliable probabil
 def neural_cssr(data, transformer, L_max, alpha):
     # Phase I: Train transformer
     transformer.train(data)  # Standard autoregressive training
-    
+
     # Phase II: Modified sufficiency testing
     states = [{null_history}]
     for L in range(1, L_max + 1):
         for state in states:
             # Use transformer for probability estimation
             p_state = transformer.estimate_distribution(state)
-            
+
             for history in state:
                 for symbol in alphabet:
                     extended = symbol + history
                     # Neural probability estimation
                     p_extended = transformer.predict(extended)
-                    
+
                     # Same statistical tests as CSSR
                     if not test_same_distribution(p_extended, p_state, alpha):
                         assign_or_create_state(extended, states, transformer)
-    
+
     # Phase III: Identical to classical CSSR
     make_deterministic(states)
     return states
@@ -166,26 +166,26 @@ class NeuralCSSR:
         self.transformer = TransformerLM(transformer_config)
         self.L_max = cssr_params['L_max']
         self.alpha = cssr_params['alpha']
-        
+
     def estimate_conditional_prob(self, history):
         # Use transformer instead of counting
         with torch.no_grad():
             logits = self.transformer(history)
             return F.softmax(logits, dim=-1)
-    
+
     def discover_states(self, data):
         # Train transformer
         self.transformer.train_on_sequences(data)
-        
+
         # Run modified CSSR
         states = self.cssr_with_neural_probs(data)
-        
+
         # Optional: self-supervised refinement
         for _ in range(n_refinement_steps):
             synthetic_data = self.generate_from_states(states)
             self.transformer.fine_tune(synthetic_data)
             states = self.cssr_with_neural_probs(data)
-            
+
         return states
 ```
 

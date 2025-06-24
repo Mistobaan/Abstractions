@@ -16,7 +16,7 @@ The ECS **EntityRegistry** is actually implementing the **objects** of our SMC, 
 **Symmetric Monoidal Structure**:
 ```
 Tensor Product ⊗: Entity composition through EntityTree relationships
-Unit Object I: Empty entity or base Entity() 
+Unit Object I: Empty entity or base Entity()
 Symmetry σ: Entity₁ ⊗ Entity₂ ≅ Entity₂ ⊗ Entity₁
 Associativity: (A ⊗ B) ⊗ C ≅ A ⊗ (B ⊗ C)
 ```
@@ -42,7 +42,7 @@ When an entity is registered in the EntityRegistry, it becomes **shareable** (ca
 
 ```
 Dereliction ε: !A → A    =   EntityRegistry.get_entity(uuid) → Entity
-Digging δ: !A → !!A      =   Entity versioning through update_ecs_ids()  
+Digging δ: !A → !!A      =   Entity versioning through update_ecs_ids()
 Contraction: !A → !A ⊗ !A =   Multiple processes can reference same entity
 Weakening: !A → I        =   Entity can be ignored (not referenced)
 ```
@@ -54,7 +54,7 @@ The reactive orchestration layer implements **cut elimination** from linear logi
 
 ```
 Process Execution = Cut Elimination Step
-Entity Creation = Introduction Rule  
+Entity Creation = Introduction Rule
 Entity Reference = Elimination Rule
 ```
 
@@ -72,7 +72,7 @@ The `InformationOrchestrator` is performing **proof normalization** where:
 
 Where:
 - **Proc** = Category of entity types and callable processes
-- **⊗** = Entity tree composition through reference relationships  
+- **⊗** = Entity tree composition through reference relationships
 - **I** = Base Entity() or empty information state
 - **σ, α, λ, ρ** = Natural isomorphisms (handled by entity relationship management)
 - **!** = EntityRegistry registration (makes entities shareable)
@@ -82,13 +82,13 @@ Where:
 ```
 Functor: ! : Proc → Proc
         Entity ↦ RegisteredEntity
-        
-Counit: ε : !A → A  
+
+Counit: ε : !A → A
         get_entity(uuid) extracts entity from registry
-        
+
 Comultiplication: δ : !A → !!A
         entity versioning creates new registry entries
-        
+
 Coassociativity and counit laws satisfied by registry operations
 ```
 
@@ -99,7 +99,7 @@ Coassociativity and counit laws satisfied by registry operations
 1. **Petri Net Issue**: Tokens are anonymous, no compositional structure
    **ECS Solution**: Typed entities with rich relationship structure
 
-2. **Petri Net Issue**: No linear resource control  
+2. **Petri Net Issue**: No linear resource control
    **ECS Solution**: Pointer-only composition enforces linear discipline
 
 3. **Petri Net Issue**: Limited composition patterns
@@ -113,7 +113,7 @@ Coassociativity and counit laws satisfied by registry operations
 **The system is mathematically sound** because:
 
 - **Category Laws**: Satisfied by callable composition and entity identity
-- **Monoidal Laws**: Satisfied by entity tree construction algorithms  
+- **Monoidal Laws**: Satisfied by entity tree construction algorithms
 - **Linear Logic Laws**: Satisfied by reference validation and entity immutability
 - **Comonad Laws**: Satisfied by registry operations and entity versioning
 
@@ -131,7 +131,7 @@ Minimum reached when no further cuts possible (goal achieved or impossible)
 
 ### 7. What dpl0a Would Say
 
-"This is actually brilliant. They've implemented exactly what I was talking about - a symmetric monoidal category with controlled linear logic - but through practical software engineering instead of abstract mathematics. 
+"This is actually brilliant. They've implemented exactly what I was talking about - a symmetric monoidal category with controlled linear logic - but through practical software engineering instead of abstract mathematics.
 
 The Entity Component System gives us the monoidal structure, the pointer references give us linear discipline, the registry gives us the bang modality, and the reactive orchestration gives us cut elimination.
 

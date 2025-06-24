@@ -15,7 +15,7 @@ Think of a Typed Process as a **molecular machine** in a cell - it can only oper
 TypedProcess := (InputSignature, OutputSignature, Transform, Prerequisites)
 where:
   InputSignature  := ComposedPointer(MemoryStack)
-  OutputSignature := NewType ∉ MemoryStack.types  
+  OutputSignature := NewType ∉ MemoryStack.types
   Transform       := InputSignature → OutputSignature
   Prerequisites   := ConstructibilityConstraints
 ```
@@ -30,7 +30,7 @@ analyze_data(dataset="made up dataset", method="invented method")
 // VALID Typed Process:
 analyze_data(
   dataset=pointer_to(memory_stack[42]),     // Must exist
-  method=pointer_to(memory_stack[17])       // Must exist  
+  method=pointer_to(memory_stack[17])       // Must exist
 ) → AnalysisResult                          // New type
 ```
 
@@ -97,7 +97,7 @@ ComposedPointer := {
 **Hierarchical Pointers**: References to sub-components of complex structures
 ```
 ComposedPointer := {
-  type: "hierarchical", 
+  type: "hierarchical",
   target: StackAddress(42),
   path: ["user_data", "financial_info", "account_balance"],
   access_pattern: "field_access"
@@ -118,7 +118,7 @@ ComposedPointer := {
 
 **Mechanical Process**:
 1. **Process Selection**: Agent identifies a potentially useful Typed Process
-2. **Input Analysis**: System determines what information types the process requires  
+2. **Input Analysis**: System determines what information types the process requires
 3. **Availability Check**: Search memory stack for entries that can satisfy requirements
 4. **Composition Strategy**: If multiple entries needed, determine how to combine them
 5. **Pointer Construction**: Build explicit pointer structure that maps requirements to available data
@@ -130,20 +130,20 @@ ComposedPointer := {
 // Traditional Agent (PRONE TO FAILURE):
 agent: "I need to analyze sales data"
 agent: calls analyze_sales(
-  data="Q4 sales figures",           // HALLUCINATED 
+  data="Q4 sales figures",           // HALLUCINATED
   method="advanced regression",      // HALLUCINATED
-  timeframe="last 6 months"         // HALLUCINATED  
+  timeframe="last 6 months"         // HALLUCINATED
 )
 
 // Typed Process Agent (FAILURE IMPOSSIBLE):
 agent: "I need to analyze sales data"
 system: Available data in memory stack:
   [23] CSV: raw_sales_data.csv
-  [31] TimeRange: Q1_2024_range  
+  [31] TimeRange: Q1_2024_range
   [47] AnalysisMethod: linear_regression_config
 system: Can construct analyze_sales(
   data=pointer_to(23),
-  method=pointer_to(47), 
+  method=pointer_to(47),
   timeframe=pointer_to(31)
 ) → SalesAnalysis
 ```
@@ -165,7 +165,7 @@ The **Information Gain Constraint** transforms agent behavior from aimless explo
    - **Mechanism**: Type system verifies that pointer composition can satisfy input signature
    - **Failure Mode Prevented**: Agents cannot attempt operations on non-existent data
 
-**2. Novel Output**: `process.output.type ∉ memory_stack.types`  
+**2. Novel Output**: `process.output.type ∉ memory_stack.types`
    - **Meaning**: Process must produce a new type of information not already available
    - **Mechanism**: Type checker scans existing stack for output type collisions
    - **Progress Guarantee**: Prevents redundant computation and ensures forward movement
@@ -181,13 +181,13 @@ The **Information Gain Constraint** transforms agent behavior from aimless explo
 ```
 // Available memory stack:
 [15] UserQuery: "What are our top customers?"
-[22] DataSet: raw_customer_data.csv  
+[22] DataSet: raw_customer_data.csv
 [31] AnalysisMethod: revenue_ranking
 
 // VALID process (meets all constraints):
 generate_customer_ranking(
   data=pointer_to(22),           // ✓ Constructible
-  method=pointer_to(31),         // ✓ Constructible  
+  method=pointer_to(31),         // ✓ Constructible
   query=pointer_to(15)           // ✓ Constructible
 ) → CustomerRanking              // ✓ Novel type, ✓ Positive entropy
 
@@ -218,7 +218,7 @@ InfoGain(process, stack, goal) := H(Goal | stack) - H(Goal | stack ∪ process.o
 - **Low Value**: Goal is well-understood given current information - close to completion
 - **Zero Value**: Goal is completely determined by current information - already achieved
 
-**H(Goal | stack ∪ process.output)**: Predicted uncertainty after process execution  
+**H(Goal | stack ∪ process.output)**: Predicted uncertainty after process execution
 - **Calculation**: Uses learned world model to estimate entropy reduction
 - **Uncertainty**: Model may be wrong about actual information gain
 - **Learning**: Actual outcomes update world model predictions
@@ -240,7 +240,7 @@ Candidate Processes:
    - Predicted H(Goal | stack + LibraryComparison) = 3.1 bits
    - InfoGain = 4.2 - 3.1 = 1.1 bits
 
-2. write_basic_scraper(...) → CodeDraft  
+2. write_basic_scraper(...) → CodeDraft
    - Predicted H(Goal | stack + CodeDraft) = 2.8 bits
    - InfoGain = 4.2 - 2.8 = 1.4 bits  ← Higher gain, selected
 
@@ -267,8 +267,8 @@ Process availability creates a **dynamic computational landscape** that changes 
 **Availability Function:**
 ```
 Available(stack, goal) := {
-  p ∈ AllProcesses | 
-    can_construct(p.input, stack) ∧ 
+  p ∈ AllProcesses |
+    can_construct(p.input, stack) ∧
     p.output.type ∉ stack.types ∧
     InfoGain(p, stack, goal) > threshold
 }
@@ -278,7 +278,7 @@ Available(stack, goal) := {
 
 **Constructibility Constraint**: As the memory stack grows, MORE processes become available
 - **Early Stage**: Few processes available (limited input data)
-- **Middle Stage**: Rich process ecosystem emerges (many data types to combine)  
+- **Middle Stage**: Rich process ecosystem emerges (many data types to combine)
 - **Late Stage**: Specialized processes become accessible (complex inputs available)
 
 **Novelty Constraint**: As the memory stack grows, FEWER processes remain available
@@ -298,7 +298,7 @@ Available(stack, goal) := {
 Stack: [(UserQuery, "analyze customer churn", 0)]
 Available: [
   load_data(...) → DataSet,           // Basic data loading
-  research_methods(...) → Literature, // Background research  
+  research_methods(...) → Literature, // Background research
   define_metrics(...) → Metrics       // Problem specification
 ]
 Unavailable: [
@@ -315,7 +315,7 @@ Stack: [
   (DataSet, customer_data.csv, 1)
 ]
 Available: [
-  explore_data(...) → DataSummary,    // Now constructible  
+  explore_data(...) → DataSummary,    // Now constructible
   clean_data(...) → CleanDataSet,     // Now constructible
   feature_engineering(...) → Features, // Now constructible
   define_metrics(...) → Metrics       // Still available
@@ -331,7 +331,7 @@ Unavailable: [
 Stack: [
   ...,
   (Features, engineered_features, 5),
-  (Metrics, churn_definition, 6)  
+  (Metrics, churn_definition, 6)
 ]
 Available: [
   train_model(...) → TrainedModel,    // NOW constructible
@@ -368,7 +368,7 @@ Goals in this framework are **information-theoretic targets** rather than tradit
 ```
 Goal := {
   target_types: Set[Type],              // What information types are needed
-  target_values: PartialSpecification,  // Constraints on those values  
+  target_values: PartialSpecification,  // Constraints on those values
   success_condition: MemoryStack → Boolean,  // Completion check
   entropy_model: StackState → Float     // Uncertainty quantification
 }
@@ -389,7 +389,7 @@ target_types = {
 
 **Target Values**: Provides **partial constraints** on the target information content
 ```
-// Research goal  
+// Research goal
 target_values = {
   Insight.novelty > 0.8,          // Must be novel finding
   Evidence.confidence > 0.95,     // High statistical confidence
@@ -400,16 +400,16 @@ target_values = {
 
 **Success Condition**: **Computational predicate** that determines goal achievement
 ```
-success_condition(stack) := 
+success_condition(stack) :=
   all_types_present(stack, target_types) ∧
-  all_constraints_satisfied(stack, target_values) ∧  
+  all_constraints_satisfied(stack, target_values) ∧
   coherence_check(stack) ∧
   quality_threshold_met(stack)
 ```
 
 **Entropy Model**: **Learned function** that estimates remaining uncertainty toward goal
 ```
-entropy_model(stack) := 
+entropy_model(stack) :=
   learned_neural_network(
     input=stack_state_encoding(stack),
     output=estimated_remaining_bits
@@ -423,12 +423,12 @@ entropy_model(stack) :=
 Goal_initial: "Build a recommendation system"
 └─ High entropy: many unknowns about requirements
 
-// Refined goal (after user interaction)  
+// Refined goal (after user interaction)
 Goal_refined: "Build collaborative filtering recommender for movies"
 └─ Medium entropy: architecture clearer, details remain
 
 // Specific goal (after technical analysis)
-Goal_specific: "Implement matrix factorization with implicit feedback"  
+Goal_specific: "Implement matrix factorization with implicit feedback"
 └─ Low entropy: clear technical target
 ```
 
@@ -456,14 +456,14 @@ next_process = argmax_{p ∈ Available(stack, goal)} InfoGain(p, stack, goal)
 - **Example**: Research multiple approaches, survey existing solutions
 - **Information Pattern**: Stack grows rapidly with diverse but shallow information
 
-**Focused Investigation Phase**: When `H(Goal | stack)` is medium (goal partially clear)  
+**Focused Investigation Phase**: When `H(Goal | stack)` is medium (goal partially clear)
 - **Strategy**: Prefer processes with high **targeted information gain**
 - **Behavior**: Deep dives into promising directions identified during exploration
 - **Example**: Detailed technical analysis of chosen approach
 - **Information Pattern**: Stack grows selectively with deep, specialized information
 
 **Optimization Phase**: When `H(Goal | stack)` is low (goal nearly clear)
-- **Strategy**: Prefer processes with high **precision information gain**  
+- **Strategy**: Prefer processes with high **precision information gain**
 - **Behavior**: Fine-tuning, validation, edge case handling
 - **Example**: Performance optimization, error handling, documentation
 - **Information Pattern**: Stack grows slowly with highly specific, quality-focused information
@@ -481,7 +481,7 @@ High-gain processes:
 Selection: analyze_requirements() - highest gain
 ```
 
-**Phase 2: Medium Entropy (H = 3.1 bits)**  
+**Phase 2: Medium Entropy (H = 3.1 bits)**
 ```
 Current understanding: "REST API for user management with authentication"
 High-gain processes:
@@ -496,7 +496,7 @@ Selection: design_database_schema() - addresses core uncertainty
 ```
 Current understanding: "FastAPI + PostgreSQL + JWT auth, schema defined"
 High-gain processes:
-1. implement_core_handlers() → APIImplementation (gain: 0.4 bits) ← Selected  
+1. implement_core_handlers() → APIImplementation (gain: 0.4 bits) ← Selected
 2. write_tests() → TestSuite (gain: 0.3 bits)
 3. setup_deployment() → DeploymentConfig (gain: 0.2 bits)
 
@@ -505,7 +505,7 @@ Selection: implement_core_handlers() - final major uncertainty
 
 **Adaptive Intelligence**: The agent's behavior **automatically adapts** to its current understanding level:
 - **When lost**: Explores broadly to reduce high-level uncertainty
-- **When focused**: Investigates deeply in promising directions  
+- **When focused**: Investigates deeply in promising directions
 - **When close**: Optimizes and polishes toward completion
 
 **Information Thermodynamics**: The entropy-driven approach creates **information thermodynamics** where the agent flows naturally from high-entropy (confused) states toward low-entropy (clear) states, with goal achievement as the entropy minimum.
@@ -533,13 +533,13 @@ The agent's decision space forms a **hypergraph** where nodes represent knowledg
 ```
 Nodes:
 S₁: [UserQuery: "optimize database"]
-S₂: [UserQuery: "optimize database", DatabaseSchema: schema.sql] 
+S₂: [UserQuery: "optimize database", DatabaseSchema: schema.sql]
 S₃: [UserQuery: "optimize database", PerformanceMetrics: current_stats]
 S₄: [UserQuery, DatabaseSchema, PerformanceMetrics, IndexAnalysis: recommendations]
 
 Hyperedges:
 E₁: {S₁} → S₂ via load_schema_process
-E₂: {S₁} → S₃ via collect_metrics_process  
+E₂: {S₁} → S₃ via collect_metrics_process
 E₃: {S₂, S₃} → S₄ via analyze_performance_process  // Multi-input hyperedge
 ```
 
@@ -587,11 +587,11 @@ Initial State: [UserRequest: "segment customers"]
 
 Step 1: Expand initial state
 ├─ load_customer_data() → [UserRequest, CustomerData] (f=3.2)
-├─ research_segmentation() → [UserRequest, Literature] (f=3.8)  
+├─ research_segmentation() → [UserRequest, Literature] (f=3.8)
 └─ define_segments() → [UserRequest, SegmentDefinition] (f=4.1)
 Select: load_customer_data (lowest f-score)
 
-Step 2: Expand data loading state  
+Step 2: Expand data loading state
 ├─ explore_data() → [UserRequest, CustomerData, DataSummary] (f=2.1)
 ├─ clean_data() → [UserRequest, CustomerData, CleanData] (f=2.4)
 └─ feature_engineering() → [UserRequest, CustomerData, Features] (f=2.8)
@@ -599,7 +599,7 @@ Select: explore_data (lowest f-score)
 
 Step 3: Multi-input expansion
 ├─ {explore_data, research_segmentation} → advanced_analysis (f=1.2)
-├─ statistical_analysis() → [UserRequest, CustomerData, DataSummary, Statistics] (f=1.8)  
+├─ statistical_analysis() → [UserRequest, CustomerData, DataSummary, Statistics] (f=1.8)
 └─ visualization() → [UserRequest, CustomerData, DataSummary, Plots] (f=2.0)
 Select: advanced_analysis (combines previous work optimally)
 ```
@@ -624,7 +624,7 @@ Traditional reinforcement learning suffers from **sparse rewards** and **tempora
 
 **Episode Completion**: When agent reaches terminal state (success or failure)
 1. **Information Value Computation**: Calculate how much each memory stack entry actually contributed to goal achievement
-2. **Temporal Credit Assignment**: Backpropagate information value through the execution trace  
+2. **Temporal Credit Assignment**: Backpropagate information value through the execution trace
 3. **World Model Update**: Refine entropy estimates based on observed information contributions
 4. **Process Value Learning**: Update expectations about which processes provide valuable information
 
@@ -634,9 +634,9 @@ Traditional reinforcement learning suffers from **sparse rewards** and **tempora
 
 **Information Value Calculation**:
 ```
-InfoValue(entry_i, terminal_state) := 
+InfoValue(entry_i, terminal_state) :=
   mutual_information(entry_i, goal_achievement) +
-  causal_contribution(entry_i, subsequent_entries) +  
+  causal_contribution(entry_i, subsequent_entries) +
   temporal_importance(entry_i, decision_sequence)
 ```
 
@@ -647,12 +647,12 @@ InfoValue(entry_i, terminal_state) :=
 MI(entry_i, goal) = H(goal) - H(goal | entry_i)
 ```
 - **High MI**: Information strongly predicts goal outcome
-- **Low MI**: Information irrelevant to goal achievement  
+- **Low MI**: Information irrelevant to goal achievement
 - **Example**: In code generation task, working code has high MI with success
 
 **Causal Contribution**: How much the entry enabled subsequent valuable information
 ```
-CC(entry_i) = Σ_{j>i} InfoValue(entry_j) × causal_weight(i→j)  
+CC(entry_i) = Σ_{j>i} InfoValue(entry_j) × causal_weight(i→j)
 ```
 - **Foundation Value**: Early entries that enable valuable later work
 - **Multiplier Effect**: Information that unlocks multiple downstream discoveries
@@ -671,18 +671,18 @@ TI(entry_i) = temporal_decay(timestamp_i) × urgency_weight(entry_i)
 function backpropagate_information_value(episode_trace, terminal_outcome):
     # Start from terminal state
     current_value = terminal_outcome.success_value
-    
+
     # Work backwards through execution trace
     for step in reversed(episode_trace):
         # Calculate this step's information contribution
         step.info_value = calculate_contribution(step, current_value)
-        
+
         # Update world model expectations
         update_entropy_estimates(step.memory_state, step.info_value)
-        
-        # Update process value estimates  
+
+        # Update process value estimates
         update_process_expectations(step.process_used, step.info_value)
-        
+
         # Propagate value to predecessor states
         current_value += step.info_value
 ```
@@ -691,7 +691,7 @@ function backpropagate_information_value(episode_trace, terminal_outcome):
 ```
 Execution Trace:
 1. load_error_logs() → ErrorData (predicted_value: 0.3, actual_value: 0.8)
-2. search_documentation() → DocsInfo (predicted: 0.5, actual: 0.1)  
+2. search_documentation() → DocsInfo (predicted: 0.5, actual: 0.1)
 3. reproduce_error() → ReproCase (predicted: 0.7, actual: 1.2)
 4. analyze_stack_trace() → BugLocation (predicted: 0.9, actual: 1.5)
 5. implement_fix() → Solution (predicted: 1.0, actual: 1.0)
@@ -699,7 +699,7 @@ Execution Trace:
 Learning Updates:
 - load_error_logs: Higher value than expected → increase entropy reduction estimate
 - search_documentation: Lower value → decrease estimation for this problem type
-- reproduce_error: Much higher value → major update to reproduction process value  
+- reproduce_error: Much higher value → major update to reproduction process value
 - analyze_stack_trace: Higher value → stack traces are very informative
 - implement_fix: As expected → no update needed
 ```
@@ -715,7 +715,7 @@ new_estimate = α × actual_uncertainty_reduction + (1-α) × old_estimate
 **Process Value Learning**: Update expectations about information gain from different process types
 ```
 expected_gain[process_type] = update_running_average(
-    expected_gain[process_type], 
+    expected_gain[process_type],
     observed_gain
 )
 ```
@@ -748,7 +748,7 @@ value_model[process_type][context_features] = update_conditional_expectation(
 ### 4.2 Information Value Function
 
 ```
-InfoValue(entry_i, terminal_state) := 
+InfoValue(entry_i, terminal_state) :=
   mutual_information(entry_i, goal_achievement)
 ```
 
@@ -776,20 +776,20 @@ The MemoryStack Manager handles all information storage and retrieval operations
 class MemoryStackManager:
     def append(self, entry_type: Type, value: Any, metadata: Dict) -> StackAddress:
         """Add new information with automatic indexing and provenance tracking"""
-        
+
     def resolve_pointer(self, pointer: ComposedPointer) -> ResolvedValue:
         """Convert pointer reference to actual data with type checking"""
-        
+
     def can_construct(self, input_signature: InputType, stack: MemoryStack) -> bool:
         """Check if required input can be built from available data"""
-        
+
     def compose_input(self, signature: InputType, strategy: CompositionStrategy) -> ComposedPointer:
         """Build complex inputs from multiple stack entries"""
 ```
 
 **Implementation Details**:
 - **Storage Backend**: Append-only log with hierarchical indexing
-- **Type System**: Runtime type checking with dependent type support  
+- **Type System**: Runtime type checking with dependent type support
 - **Pointer Resolution**: Efficient lookup with caching for complex compositions
 - **Garbage Collection**: None needed - immutable entries never deleted
 - **Concurrency**: Multiple readers, single writer with atomic appends
@@ -803,13 +803,13 @@ The Process Registry maintains the **dynamic catalog** of available processes an
 class ProcessRegistry:
     def register_process(self, process: TypedProcess) -> ProcessId:
         """Add new process to the registry with type signature validation"""
-        
+
     def get_available(self, stack: MemoryStack, goal: Goal) -> List[ProcessId]:
         """Filter processes by constructibility and information gain"""
-        
+
     def estimate_info_gain(self, process: ProcessId, stack: MemoryStack, goal: Goal) -> Float:
         """Predict information gain from process execution"""
-        
+
     def execute_process(self, process: ProcessId, inputs: ComposedPointer) -> ProcessResult:
         """Run process with type checking and error handling"""
 ```
@@ -830,13 +830,13 @@ The Navigation Engine implements the **A* hypergraph search** with information-t
 class NavigationEngine:
     def plan_next_action(self, current_state: AgentState, goal: Goal) -> ProcessId:
         """Select optimal next process using A* with entropy heuristic"""
-        
+
     def expand_frontier(self, state: AgentState) -> List[AgentState]:
         """Generate successor states from available processes"""
-        
+
     def update_heuristic(self, state: AgentState, observed_gain: Float) -> None:
         """Refine entropy estimates based on actual outcomes"""
-        
+
     def prune_search_space(self, frontier: List[AgentState], goal: Goal) -> List[AgentState]:
         """Remove unpromising states to maintain computational tractability"""
 ```
@@ -857,13 +857,13 @@ The Learning System implements **Rudder-style credit assignment** and continuous
 class LearningSystem:
     def record_episode(self, trace: ExecutionTrace, outcome: TerminalState) -> None:
         """Store complete episode for later analysis"""
-        
+
     def backpropagate_values(self, episode: Episode) -> Dict[StackAddress, Float]:
         """Calculate information value for each memory entry"""
-        
+
     def update_world_model(self, value_assignments: Dict[StackAddress, Float]) -> None:
         """Refine entropy estimates and process value predictions"""
-        
+
     def get_improved_estimates(self, state: AgentState, goal: Goal) -> Float:
         """Return learned entropy estimate for state-goal pair"""
 ```
@@ -885,12 +885,12 @@ The Process Execution Pipeline orchestrates the **complete decision-making cycle
 ```python
 def assess_current_state(agent: GoalDirectedAgent) -> StateAssessment:
     """Comprehensive analysis of current cognitive state"""
-    
+
     # Analyze memory stack composition
     available_types = extract_types(agent.memory_stack)
     information_density = calculate_entropy(agent.memory_stack)
     goal_progress = estimate_goal_proximity(agent.memory_stack, agent.goal)
-    
+
     # Compute available action space
     constructible_processes = filter_by_constructibility(
         all_processes, agent.memory_stack
@@ -898,7 +898,7 @@ def assess_current_state(agent: GoalDirectedAgent) -> StateAssessment:
     novel_processes = filter_by_novelty(
         constructible_processes, agent.memory_stack
     )
-    
+
     return StateAssessment(
         current_types=available_types,
         information_content=information_density,
@@ -911,30 +911,30 @@ def assess_current_state(agent: GoalDirectedAgent) -> StateAssessment:
 **Step 2: Information Gain Estimation**
 ```python
 def estimate_information_gains(
-    processes: List[ProcessId], 
-    state: AgentState, 
+    processes: List[ProcessId],
+    state: AgentState,
     goal: Goal
 ) -> Dict[ProcessId, Float]:
     """Predict information value for each available process"""
-    
+
     gain_estimates = {}
     current_entropy = agent.world_model.estimate_entropy(state.memory_stack, goal)
-    
+
     for process in processes:
         # Predict output type and content
         predicted_output = agent.world_model.predict_output(process, state)
-        
+
         # Estimate entropy after process execution
         hypothetical_stack = state.memory_stack + predicted_output
         future_entropy = agent.world_model.estimate_entropy(hypothetical_stack, goal)
-        
+
         # Calculate expected information gain
         gain_estimates[process] = current_entropy - future_entropy
-        
+
         # Adjust for uncertainty in prediction
         prediction_confidence = agent.world_model.get_confidence(process, state)
         gain_estimates[process] *= prediction_confidence
-    
+
     return gain_estimates
 ```
 
@@ -947,26 +947,26 @@ def select_optimal_process(
     goal: Goal
 ) -> ProcessId:
     """Choose process that minimizes expected path cost to goal"""
-    
+
     # Calculate f-scores for each process
     f_scores = {}
     for process in available_processes:
         # g(state): actual cost so far
         g_cost = state.computational_cost + get_process_cost(process)
-        
+
         # h(state): heuristic remaining cost (entropy-based)
         current_entropy = agent.world_model.estimate_entropy(state.memory_stack, goal)
         predicted_output = agent.world_model.predict_output(process, state)
         future_stack = state.memory_stack + predicted_output
         future_entropy = agent.world_model.estimate_entropy(future_stack, goal)
         h_cost = future_entropy  # Remaining uncertainty as cost
-        
+
         # f(state) = g(state) + h(state)
         f_scores[process] = g_cost + h_cost
-    
+
     # Select process with minimum f-score
     optimal_process = min(f_scores.keys(), key=lambda p: f_scores[p])
-    
+
     # Log decision reasoning for learning
     agent.learning_system.record_decision(
         state=state,
@@ -974,28 +974,28 @@ def select_optimal_process(
         choice=optimal_process,
         reasoning=f_scores
     )
-    
+
     return optimal_process
 ```
 
 **Step 4: Pointer Composition**
 ```python
 def compose_process_input(
-    process: ProcessId, 
+    process: ProcessId,
     memory_stack: MemoryStack
 ) -> ComposedPointer:
     """Build valid input from memory stack entries"""
-    
+
     input_signature = get_input_signature(process)
-    
+
     # Find optimal composition strategy
     composition_candidates = find_composition_strategies(
         input_signature, memory_stack
     )
-    
+
     best_composition = None
     best_score = float('-inf')
-    
+
     for candidate in composition_candidates:
         # Score based on information quality and recency
         score = (
@@ -1003,11 +1003,11 @@ def compose_process_input(
             candidate.recency_bonus * 0.3 +
             candidate.type_match_quality * 0.3
         )
-        
+
         if score > best_score:
             best_score = score
             best_composition = candidate
-    
+
     # Construct the actual pointer
     composed_pointer = ComposedPointer(
         strategy=best_composition.strategy,
@@ -1015,10 +1015,10 @@ def compose_process_input(
         auxiliary_entries=best_composition.auxiliary_sources,
         composition_function=best_composition.combiner
     )
-    
+
     # Validate pointer before returning
     assert validate_pointer_composition(composed_pointer, input_signature)
-    
+
     return composed_pointer
 ```
 
@@ -1030,25 +1030,25 @@ def execute_process_safely(
     agent: GoalDirectedAgent
 ) -> ProcessResult:
     """Execute process with comprehensive monitoring and error handling"""
-    
+
     start_time = time.time()
-    
+
     try:
         # Pre-execution validation
         validate_input_types(inputs, get_input_signature(process))
         validate_computational_budget(process, agent.remaining_budget)
-        
+
         # Resolve pointers to actual values
         resolved_inputs = agent.memory_manager.resolve_pointer(inputs)
-        
+
         # Execute the process
         with resource_monitor() as monitor:
             raw_output = invoke_process(process, resolved_inputs)
-        
+
         # Post-execution validation
         validate_output_type(raw_output, get_output_signature(process))
         validate_information_content(raw_output)  # Ensure non-trivial output
-        
+
         # Package result with metadata
         execution_metadata = ExecutionMetadata(
             process_id=process,
@@ -1057,14 +1057,14 @@ def execute_process_safely(
             input_provenance=inputs.get_provenance(),
             quality_metrics=assess_output_quality(raw_output)
         )
-        
+
         return ProcessResult(
             output_value=raw_output,
             output_type=get_output_signature(process),
             metadata=execution_metadata,
             success=True
         )
-        
+
     except ProcessExecutionError as e:
         # Log failure for learning
         agent.learning_system.record_failure(
@@ -1073,7 +1073,7 @@ def execute_process_safely(
             error=e,
             context=agent.get_current_state()
         )
-        
+
         return ProcessResult(
             output_value=None,
             output_type=None,
@@ -1090,7 +1090,7 @@ def update_memory_stack(
     agent: GoalDirectedAgent
 ) -> StackAddress:
     """Add new information to memory stack with full provenance tracking"""
-    
+
     if not result.success:
         # Handle failure case
         failure_entry = FailureRecord(
@@ -1099,7 +1099,7 @@ def update_memory_stack(
             error_message=str(result.error),
             context_snapshot=agent.get_current_state()
         )
-        
+
         return agent.memory_manager.append(
             entry_type=FailureRecord,
             value=failure_entry,
@@ -1109,7 +1109,7 @@ def update_memory_stack(
                 "timestamp": time.time()
             }
         )
-    
+
     # Success case - add valuable new information
     new_address = agent.memory_manager.append(
         entry_type=result.output_type,
@@ -1123,11 +1123,11 @@ def update_memory_stack(
             "information_content": calculate_entropy(result.output_value)
         }
     )
-    
+
     # Update agent's internal state
     agent.computational_budget -= result.metadata.resource_usage.total_cost
     agent.total_information_gathered += result.metadata.quality_metrics.information_gain
-    
+
     return new_address
 ```
 
@@ -1135,7 +1135,7 @@ def update_memory_stack(
 ```python
 def check_goal_convergence(agent: GoalDirectedAgent) -> ConvergenceResult:
     """Determine if goal has been achieved or if progress has stalled"""
-    
+
     # Check explicit success condition
     if agent.goal.success_condition(agent.memory_stack):
         return ConvergenceResult(
@@ -1144,25 +1144,25 @@ def check_goal_convergence(agent: GoalDirectedAgent) -> ConvergenceResult:
             remaining_entropy=0.0,
             completion_evidence=extract_goal_evidence(agent.memory_stack, agent.goal)
         )
-    
+
     # Check if goal is achievable with current information
     current_entropy = agent.world_model.estimate_entropy(
         agent.memory_stack, agent.goal
     )
-    
+
     if current_entropy < agent.goal.completion_threshold:
         return ConvergenceResult(
-            status="NEAR_SUCCESS", 
+            status="NEAR_SUCCESS",
             confidence=0.8,
             remaining_entropy=current_entropy,
             next_steps=suggest_completion_steps(agent.memory_stack, agent.goal)
         )
-    
+
     # Check for stagnation
     recent_entropy_reduction = calculate_recent_progress(
         agent.entropy_history, window_size=5
     )
-    
+
     if recent_entropy_reduction < agent.stagnation_threshold:
         return ConvergenceResult(
             status="STAGNATED",
@@ -1170,7 +1170,7 @@ def check_goal_convergence(agent: GoalDirectedAgent) -> ConvergenceResult:
             remaining_entropy=current_entropy,
             suggestions=suggest_alternative_approaches(agent)
         )
-    
+
     # Still making progress
     return ConvergenceResult(
         status="IN_PROGRESS",
@@ -1184,7 +1184,7 @@ def check_goal_convergence(agent: GoalDirectedAgent) -> ConvergenceResult:
 ```python
 def execute_full_pipeline(agent: GoalDirectedAgent) -> PipelineResult:
     """Complete decision-action cycle"""
-    
+
     # Execute each step in sequence
     state_assessment = assess_current_state(agent)
     gain_estimates = estimate_information_gains(
@@ -1197,14 +1197,14 @@ def execute_full_pipeline(agent: GoalDirectedAgent) -> PipelineResult:
     execution_result = execute_process_safely(selected_process, composed_input, agent)
     new_address = update_memory_stack(execution_result, agent)
     convergence_status = check_goal_convergence(agent)
-    
+
     # Update agent state for next iteration
     agent.update_state(
         new_memory_entry=new_address,
         execution_result=execution_result,
         convergence_status=convergence_status
     )
-    
+
     return PipelineResult(
         action_taken=selected_process,
         information_gained=execution_result.metadata.quality_metrics.information_gain,
@@ -1221,7 +1221,7 @@ This pipeline creates a **complete cognitive cycle** that transforms uncertain g
 
 **Theorem**: Under finite type spaces and positive information gain constraints, Goal-Directed Typed Processes converge to goal states in finite time.
 
-**Proof Sketch**: 
+**Proof Sketch**:
 - Monotonic information increase + finite type space → finite state space
 - A* optimality + positive gain → guaranteed progress toward minimum entropy
 
@@ -1271,7 +1271,7 @@ The marriage of computational mechanics and formal type theory creates a practic
 
 **Key Contributions:**
 - Elimination of hallucinated inputs through pointer-only composition
-- Information-theoretic formalization of goal-directed behavior  
+- Information-theoretic formalization of goal-directed behavior
 - Hypergraph search with entropy-based heuristics
 - Rudder-style credit assignment for world model learning
 - Convergence guarantees for finite type spaces
@@ -1289,7 +1289,7 @@ The Goal-Directed Typed Processes framework provides the theoretical foundation 
 **Core Insight**: Instead of building abstract categorical structures, we implement the information-theoretic principles through **practical software engineering patterns** that naturally enforce the constraints we need:
 
 - **Entity Component System** → Memory Stack with perfect provenance
-- **Callable Registry** → Process execution with automatic tracing  
+- **Callable Registry** → Process execution with automatic tracing
 - **Entity References** → Pointer-only composition with type safety
 - **Automatic Versioning** → Information gain measurement and monotonic growth
 
@@ -1317,7 +1317,7 @@ class Entity(BaseModel):
     from_storage: bool = Field(default=False, description="Whether the entity was loaded from storage")
     untyped_data: str = Field(default="", description="Default data container for untyped data")
     attribute_source: Dict[str, Union[Optional[UUID], List[Optional[UUID]], List[None], Dict[str, Optional[UUID]]]] = Field(
-        default_factory=dict, 
+        default_factory=dict,
         description="Tracks the source entity for each attribute"
     )
 ```
@@ -1332,18 +1332,18 @@ def validate_attribute_source(self) -> Self:
     # Initialize the attribute_source if not present
     if self.attribute_source is None:
         raise ValueError("attribute_source is None factory did not work")
-    
+
     # Get all valid field names for this model
     valid_fields = set(self.model_fields.keys())
     valid_fields.discard('attribute_source')  # Prevent recursion
-    
+
     # Initialize missing fields with appropriate structure based on field type
     for field_name in valid_fields:
         field_value = getattr(self, field_name)
-        
+
         if field_name in self.attribute_source:
             continue
-            
+
         # Handle different field types
         if isinstance(field_value, list):
             none_value: Optional[UUID] = None
@@ -1414,25 +1414,25 @@ class EntityTree(BaseModel):
     # Basic tree info
     root_ecs_id: UUID
     lineage_id: UUID
-    
+
     # Node storage - maps entity.ecs_id to the entity object
     nodes: Dict[UUID, "Entity"] = Field(default_factory=dict)
-    
+
     # Edge storage - maps (source_id, target_id) to edge details
     edges: Dict[Tuple[UUID, UUID], EntityEdge] = Field(default_factory=dict)
-    
+
     # Outgoing edges by source - maps entity.ecs_id to list of target IDs
     outgoing_edges: Dict[UUID, List[UUID]] = Field(default_factory=lambda: defaultdict(list))
-    
+
     # Incoming edges by target - maps entity.ecs_id to list of source IDs
     incoming_edges: Dict[UUID, List[UUID]] = Field(default_factory=lambda: defaultdict(list))
-    
+
     # Ancestry paths - maps entity.ecs_id to list of IDs from entity to root
     ancestry_paths: Dict[UUID, List[UUID]] = Field(default_factory=dict)
-    
+
     # Map of live_id to ecs_id for easy lookup
     live_id_to_ecs_id: Dict[UUID, UUID] = Field(default_factory=dict)
-    
+
     # Metadata for debugging and tracking
     node_count: int = 0
     edge_count: int = 0
@@ -1473,77 +1473,77 @@ def build_entity_tree(root_entity: "Entity") -> EntityTree:
         root_ecs_id=root_entity.ecs_id,
         lineage_id=root_entity.lineage_id
     )
-    
+
     # Maps entity ecs_id to its ancestry path
     ancestry_paths = {root_entity.ecs_id: [root_entity.ecs_id]}
-    
+
     # Queue for breadth-first traversal with path information
     to_process: deque[tuple[Entity, Optional[UUID]]] = deque([(root_entity, None)])
     processed = set()
-    
+
     # Add root entity to tree
     tree.add_entity(root_entity)
     tree.set_ancestry_path(root_entity.ecs_id, [root_entity.ecs_id])
-    
+
     # Process all entities
     while to_process:
         entity, parent_id = to_process.popleft()
-        
+
         # Circular reference detection
         if entity.ecs_id in processed and parent_id is not None:
             raise ValueError(f"Circular entity reference detected: {entity.ecs_id}")
-        
+
         entity_needs_processing = entity.ecs_id not in processed
         processed.add(entity.ecs_id)
-        
+
         # Process hierarchical relationships and ancestry
         if parent_id is not None:
             edge_key = (parent_id, entity.ecs_id)
             if edge_key in tree.edges:
                 tree.mark_edge_as_hierarchical(parent_id, entity.ecs_id)
-                
+
                 # Update ancestry path with shortest path logic
                 if parent_id in ancestry_paths:
                     parent_path = ancestry_paths[parent_id]
                     entity_path = parent_path + [entity.ecs_id]
-                    
+
                     if entity.ecs_id not in ancestry_paths or len(entity_path) < len(ancestry_paths[entity.ecs_id]):
                         ancestry_paths[entity.ecs_id] = entity_path
                         tree.set_ancestry_path(entity.ecs_id, entity_path)
-        
+
         # Process entity fields for references
         if entity_needs_processing:
             for field_name in entity.model_fields:
                 value = getattr(entity, field_name)
-                
+
                 if value is None:
                     continue
-                
+
                 field_type = get_pydantic_field_type_entities(entity, field_name)
-                
+
                 # Handle different container types
                 if isinstance(value, Entity):
                     if value.ecs_id not in tree.nodes:
                         tree.add_entity(value)
-                    
+
                     process_entity_reference(
                         tree=tree, source=entity, target=value, field_name=field_name
                     )
                     to_process.append((value, entity.ecs_id))
-                
+
                 elif isinstance(value, list) and field_type:
                     for i, item in enumerate(value):
                         if isinstance(item, Entity):
                             if item.ecs_id not in tree.nodes:
                                 tree.add_entity(item)
                             process_entity_reference(
-                                tree=tree, source=entity, target=item, 
+                                tree=tree, source=entity, target=item,
                                 field_name=field_name, list_index=i
                             )
                             to_process.append((item, entity.ecs_id))
-                
+
                 # Similar handling for dict, tuple, set...
-    
+
     return tree
 ```
 
@@ -1552,21 +1552,21 @@ def build_entity_tree(root_entity: "Entity") -> EntityTree:
 ```python
 def get_pydantic_field_type_entities(entity: "Entity", field_name: str, detect_non_entities: bool = False) -> Union[Optional[Type], bool]:
     """Get the entity type from a Pydantic field, handling container types properly."""
-    
+
     # Skip identity fields that should be ignored
-    if field_name in ('ecs_id', 'live_id', 'created_at', 'forked_at', 'previous_ecs_id', 
-                      'old_ids', 'old_ecs_id', 'from_storage', 'attribute_source', 'root_ecs_id', 
+    if field_name in ('ecs_id', 'live_id', 'created_at', 'forked_at', 'previous_ecs_id',
+                      'old_ids', 'old_ecs_id', 'from_storage', 'attribute_source', 'root_ecs_id',
                       'root_live_id', 'lineage_id'):
         return None
-    
+
     field_info = entity.model_fields[field_name]
     annotation = field_info.annotation
     field_value = getattr(entity, field_name)
-    
+
     # Direct entity instance detection
     if isinstance(field_value, Entity):
         return None if detect_non_entities else type(field_value)
-    
+
     # Container analysis for populated containers
     if field_value is not None:
         if isinstance(field_value, list) and field_value:
@@ -1576,7 +1576,7 @@ def get_pydantic_field_type_entities(entity: "Entity", field_name: str, detect_n
                         if isinstance(item, Entity):
                             return type(item)
         # Similar logic for dict, tuple, set...
-    
+
     # Advanced type hint analysis for empty containers...
     return None
 ```
@@ -1602,7 +1602,7 @@ def version_entity(cls, entity: "Entity", force_versioning: bool = False) -> boo
     """Core function to version an entity with intelligent change detection"""
     if not entity.root_ecs_id:
         raise ValueError("entity has no root_ecs_id for versioning")
-    
+
     old_tree = cls.get_stored_tree(entity.root_ecs_id)
     if old_tree is None:
         cls.register_entity(entity)
@@ -1613,9 +1613,9 @@ def version_entity(cls, entity: "Entity", force_versioning: bool = False) -> boo
             modified_entities = new_tree.nodes.keys()
         else:
             modified_entities = list(find_modified_entities(new_tree=new_tree, old_tree=old_tree))
-    
+
         typed_entities = [entity for entity in modified_entities if isinstance(entity, UUID)]
-        
+
         if len(typed_entities) > 0:
             # Complex versioning logic that updates ecs_ids for changed entities
             # while maintaining lineage relationships...
@@ -1623,13 +1623,13 @@ def version_entity(cls, entity: "Entity", force_versioning: bool = False) -> boo
             root_entity = new_tree.get_entity(current_root_ecs_id)
             root_entity.update_ecs_ids()
             new_root_ecs_id = root_entity.ecs_id
-            
+
             # Update tree structure and register new version
             new_tree.nodes.pop(current_root_ecs_id)
             new_tree.nodes[new_root_ecs_id] = root_entity
             new_tree.root_ecs_id = new_root_ecs_id
             new_tree.lineage_id = root_entity.lineage_id
-            
+
             cls.register_entity_tree(new_tree)
         return True
 ```
@@ -1639,55 +1639,55 @@ def version_entity(cls, entity: "Entity", force_versioning: bool = False) -> boo
 ```python
 def find_modified_entities(new_tree: EntityTree, old_tree: EntityTree, greedy: bool = True, debug: bool = False) -> Union[Set[UUID], Tuple[Set[UUID], Dict[str, Any]]]:
     """Find entities that have been modified between two trees using set-based approach"""
-    
+
     modified_entities = set()
-    
+
     # Step 1: Compare node sets to identify added/removed entities
     new_entity_ids = set(new_tree.nodes.keys())
     old_entity_ids = set(old_tree.nodes.keys())
-    
+
     added_entities = new_entity_ids - old_entity_ids
     common_entities = new_entity_ids & old_entity_ids
-    
+
     # Mark all added entities and their ancestry paths for versioning
     for entity_id in added_entities:
         path = new_tree.get_ancestry_path(entity_id)
         modified_entities.update(path)
-    
+
     # Step 2: Compare edge sets to identify moved entities
     new_edges = set((source_id, target_id) for (source_id, target_id) in new_tree.edges.keys())
     old_edges = set((source_id, target_id) for (source_id, target_id) in old_tree.edges.keys())
-    
+
     added_edges = new_edges - old_edges
-    
+
     # Identify moved entities with different parents
     for source_id, target_id in added_edges:
         if target_id in common_entities:
             # Check if entity has different parents
             old_parents = {s for s, t in old_edges if t == target_id}
             new_parents = {s for s, t in new_edges if t == target_id}
-            
+
             if old_parents != new_parents:
                 path = new_tree.get_ancestry_path(target_id)
                 modified_entities.update(path)
-    
+
     # Step 3: Check attribute changes for remaining entities
-    remaining_entities = [(len(new_tree.get_ancestry_path(entity_id)), entity_id) 
-                         for entity_id in common_entities 
+    remaining_entities = [(len(new_tree.get_ancestry_path(entity_id)), entity_id)
+                         for entity_id in common_entities
                          if entity_id not in modified_entities]
-    
+
     remaining_entities.sort(reverse=True)  # Process leaf nodes first
-    
+
     for _, entity_id in remaining_entities:
         new_entity = new_tree.get_entity(entity_id)
         old_entity = old_tree.get_entity(entity_id)
-        
+
         if new_entity and old_entity:
             has_changes = compare_non_entity_attributes(new_entity, old_entity)
             if has_changes:
                 path = new_tree.get_ancestry_path(entity_id)
                 modified_entities.update(path)
-    
+
     return modified_entities
 ```
 
@@ -1749,7 +1749,7 @@ execute_callable("analyze_customer_segments", {
 ```
 
 The system **automatically resolves** these references by:
-1. **Parsing** the `@uuid.field` syntax 
+1. **Parsing** the `@uuid.field` syntax
 2. **Retrieving** the entity from `EntityRegistry.get_live_entity(uuid)`
 3. **Navigating** the field path using the sophisticated type detection system
 4. **Validating** type compatibility with the callable's parameter requirements
@@ -1810,7 +1810,7 @@ entity_tree = build_entity_tree(hierarchical_entity)
 
 This **architectural integration** creates a system where:
 - **Information cannot be fabricated** (entity references must exist)
-- **All transformations are traceable** (automatic provenance tracking)  
+- **All transformations are traceable** (automatic provenance tracking)
 - **Goal-directed navigation is possible** (rich entity type and relationship analysis)
 - **Learning improves over time** (version analysis reveals which information sources are most valuable)
 
@@ -1829,7 +1829,7 @@ Using the example from the original implementation:
 @CallableRegistry.register("analyze_customer_segments")
 def segment_analysis(
     customer_data: str,           # Input type constraint
-    segmentation_method: str,     # Input type constraint  
+    segmentation_method: str,     # Input type constraint
     confidence_threshold: float   # Input type constraint
 ) -> Entity:                     # Output type guarantee
     # Process logic with automatic entity tracing
@@ -1877,7 +1877,7 @@ From the planned implementation:
 # Execution with entity references
 execute_callable("analyze_customer_segments", {
     "customer_data": "@f65cf3bd-9392-499f-8f57-dba701f5069c.csv_content",
-    "segmentation_method": "@a1b2c3d4-5678-90ef-1234-567890abcdef.algorithm_name", 
+    "segmentation_method": "@a1b2c3d4-5678-90ef-1234-567890abcdef.algorithm_name",
     "confidence_threshold": 0.85  # Direct values still allowed for primitives
 })
 ```
@@ -1898,7 +1898,7 @@ This syntax creates what we call **explicit information provenance** - every pie
 
 Consider a market analysis process that needs:
 - Historical price data from a market feed entity
-- Economic indicators from a government data entity  
+- Economic indicators from a government data entity
 - Analysis parameters from a configuration entity
 - Previous analysis results from an analysis archive entity
 
@@ -1935,22 +1935,22 @@ def entity_tracer(func):
         # 1. Pre-execution entity state capture
         input_entities = extract_entities_from_args(args, kwargs)
         pre_execution_snapshots = capture_entity_states(input_entities)
-        
+
         # 2. Function execution
         result = func(*args, **kwargs)
-        
+
         # 3. Post-execution change detection
         post_execution_states = capture_entity_states(input_entities)
         changed_entities = detect_changes(pre_execution_snapshots, post_execution_states)
-        
+
         # 4. Automatic versioning for changed entities
         for entity in changed_entities:
             EntityRegistry.version_entity(entity)
-            
+
         # 5. Result entity registration
         if isinstance(result, Entity):
             EntityRegistry.register_entity(result)
-            
+
         return result
     return wrapper
 ```
@@ -2098,14 +2098,14 @@ class InformationEvent(BaseModel):
     timestamp: datetime = Field(default_factory=datetime.now)
     event_type: EventType = Field(description="Type of information event")
     phase: EventPhase = Field(default=EventPhase.DECLARATION)
-    
+
     # Information flow tracking (from original Event class)
     modified: bool = Field(default=False)
     canceled: bool = Field(default=False)
     parent_event: Optional[UUID] = Field(default=None)
     lineage_children_events: List[UUID] = Field(default_factory=list)
     children_events: List[UUID] = Field(default_factory=list)
-    
+
     # Entity coordination metadata (new for ECS integration)
     affected_entities: List[UUID] = Field(default_factory=list)
     information_gain: float = Field(default=0.0)
@@ -2142,22 +2142,22 @@ class InformationTrigger(BaseModel):
     event_phase: EventPhase = Field(description="Process phase")
     required_entity_types: Set[str] = Field(default_factory=set)
     novel_output_types: Set[str] = Field(default_factory=set)
-    
+
     def __call__(self, event: InformationEvent, current_stack: List[Entity]) -> bool:
         """Evaluate trigger conditions"""
         # Basic event pattern matching (from original)
         if not (event.event_type == self.event_type and event.phase == self.event_phase):
             return False
-        
+
         # Type compatibility check
         available_types = {entity.__class__.__name__ for entity in current_stack}
         if self.required_entity_types and not self.required_entity_types.issubset(available_types):
             return False
-        
-        # Information gain check  
+
+        # Information gain check
         if self.novel_output_types and self.novel_output_types.issubset(available_types):
             return False
-        
+
         return True
 ```
 
@@ -2180,11 +2180,11 @@ class InformationOrchestrator:
     _events_by_type: Dict[EventType, List[InformationEvent]] = defaultdict(list)
     _events_by_timestamp: Dict[datetime, List[InformationEvent]] = defaultdict(list)
     _all_events: List[InformationEvent] = []
-    
+
     # Process coordination (adapted from event handlers)
     _process_handlers: Dict[UUID, ProcessHandler] = {}
     _handlers_by_trigger: Dict[Trigger, List[ProcessHandler]] = defaultdict(list)
-    
+
     # Information stack management (new for ECS integration)
     _current_information_stack: List[Entity] = []
 ```
@@ -2197,25 +2197,25 @@ def register(cls, event: InformationEvent) -> InformationEvent:
     """Register event and trigger reactive processes (adapted from original)"""
     # Store in all appropriate indices (original logic preserved)
     cls._store_event(event)
-    
+
     # Check for process handlers (original handler mechanism)
     handlers = cls._get_handlers_for_event(event)
-    
+
     if not handlers or event.phase == EventPhase.COMPLETION:
         return event
-    
+
     # Process through handlers (original execution logic)
     current_event = event
     for handler in handlers:
         result = handler(current_event)
-        
+
         if result and result.canceled:
             cls._store_event(result)
             return result
         elif result and result.modified:
             current_event = result
             cls._store_event(current_event)
-    
+
     return current_event
 ```
 
@@ -2235,7 +2235,7 @@ class EntityRegistry:
     lineage_registry: Dict[UUID, List[UUID]] = Field(default_factory=dict)
     live_id_registry: Dict[UUID, Entity] = Field(default_factory=dict)
     type_registry: Dict[Type[Entity], List[UUID]] = Field(default_factory=dict)
-    
+
     @classmethod
     def register_entity(cls, entity: Entity) -> None:
         """Original registration with event broadcasting"""
@@ -2243,10 +2243,10 @@ class EntityRegistry:
             raise ValueError("can only register root entities with a root_ecs_id for now")
         elif not entity.is_root_entity():
             raise ValueError("can only register root entities for now")
-        
+
         entity_tree = build_entity_tree(entity)
         cls.register_entity_tree(entity_tree)
-        
+
         # Broadcast entity creation event
         creation_event = InformationEvent(
             event_type=EventType.ENTITY_CREATION,
@@ -2264,18 +2264,18 @@ class ProcessHandler(BaseModel):
     name: str = Field(default="ProcessHandler")
     trigger_conditions: List[InformationTrigger] = Field(default_factory=list)
     callable_name: str = Field(description="Associated callable process")
-    
+
     def __call__(self, event: InformationEvent) -> Optional[InformationEvent]:
         """Execute process if conditions met (original handler interface)"""
-        if any(trigger(event, InformationOrchestrator._current_information_stack) 
+        if any(trigger(event, InformationOrchestrator._current_information_stack)
                for trigger in self.trigger_conditions):
-            
+
             # Construct entity references from current stack
             inputs = self._construct_entity_references()
-            
+
             # Execute through CallableRegistry
             result_entity = CallableRegistry.execute_callable(self.callable_name, inputs)
-            
+
             # Return process execution event
             return InformationEvent(
                 event_type=EventType.PROCESS_EXECUTION,
@@ -2295,7 +2295,7 @@ class ProcessHandler(BaseModel):
 **Stack-Driven Execution Model**: The entire system operates as a **reactive data flow architecture**:
 
 1. **Information Stack Updates** trigger stack update events
-2. **Stack Update Events** trigger compatibility checking for all registered processes  
+2. **Stack Update Events** trigger compatibility checking for all registered processes
 3. **Compatible Processes** with positive information gain automatically execute
 4. **Process Execution** produces new entities that update the stack
 5. **New Stack State** triggers the next wave of compatibility checking
@@ -2307,7 +2307,7 @@ class ProcessHandler(BaseModel):
 
 **Emergence Without Orchestration**: Complex goal-directed behavior emerges from the interaction of simple reactive rules:
 - Type compatibility determines **process eligibility**
-- Information gain determines **execution priority**  
+- Information gain determines **execution priority**
 - Natural termination occurs when **no novel information** can be produced
 - Goal achievement emerges as the system **flows toward target information types**
 
@@ -2318,12 +2318,12 @@ class ProcessHandler(BaseModel):
 **Three-Layer Reactive Architecture**: The complete system implements a **three-layer reactive architecture**:
 
 - **Entity Layer**: Immutable information storage with versioning and provenance (EntityRegistry + Entity)
-- **Process Layer**: Reactive process execution with type safety and automatic tracing (CallableRegistry + automatic entity tracing)  
+- **Process Layer**: Reactive process execution with type safety and automatic tracing (CallableRegistry + automatic entity tracing)
 - **Orchestration Layer**: Event-driven coordination with emergent goal-directed behavior (InformationOrchestrator + reactive handlers)
 
 **Information Flow Dynamics**: Information flows through the system following **natural optimization principles**:
 - **Availability** triggers **compatibility checking**
-- **Compatibility** triggers **execution eligibility**  
+- **Compatibility** triggers **execution eligibility**
 - **Information gain** determines **execution priority**
 - **Execution** produces **new availability**
 - **Cycle continues** until **goal achievement** or **natural termination**

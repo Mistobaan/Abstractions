@@ -92,7 +92,7 @@ A planning model is only useful if humans can picture what is happening.  We the
 Throughout, keep the picture of Lego bricks (typed values) and moulds (tools) in mind.
 
 ### 3.1 Type System
-**Storyline.**  *Lego angle:* Think of **labels on the studs**—a brick can say “String”, “Int”, or carry a mini‑record sticker like `{ name , age }`.  Two bricks with different labels will not click into a mould designed for one label.  
+**Storyline.**  *Lego angle:* Think of **labels on the studs**—a brick can say “String”, “Int”, or carry a mini‑record sticker like `{ name , age }`.  Two bricks with different labels will not click into a mould designed for one label.
 
 *LLMA angle:* An LLM agent sees each runtime value tagged with a JSON schema.  When it chooses a tool, the call will be rejected by the sandbox if argument tags do not match the function signature..**  Ground types `G = { String, Int, Bool, … }`; constructors `Record`, `flatten`, `projection`.  The free algebra over `G` gives **T‑types**.  Every runtime value has exactly one T‑type.
 
@@ -244,4 +244,3 @@ Treating every tool call as a stud‑respecting mould on typed Lego bricks conve
 
 ### References
 *(Lego bricks forthcoming)*
-
