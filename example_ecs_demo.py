@@ -29,7 +29,6 @@ ECS Principles Covered:
   functionality without the complexity of computed structures.
 """
 
-from typing import List
 from uuid import UUID, uuid4
 
 import abstractions as abs
@@ -348,6 +347,14 @@ def main():
     print("✓ abs.find_entities_by_relationship() with explicit tree")
     print("✓ Default tree functionality with abs.set_default_tree()")
     print("✓ Querying without tree parameter using default tree")
+    print()
+    print("=== ADDITIONAL EXAMPLES ===")
+    print("-" * 50)
+    print("📄 See example_tree_changes.py for comprehensive tree change tracking:")
+    print("   - Full diff analysis between EntityTree states")
+    print("   - Change classification (nodes, edges, components)")
+    print("   - Visual diff diagrams with Mermaid")
+    print("   - Practical change filtering and analysis")
     print()
     print(f"Total entities in world: {len(game_world.nodes)}")
     print(f"Total relationships: {len(game_world.edges)}")
